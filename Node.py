@@ -1,4 +1,5 @@
 import zmq
+import sys
 
 TEST_NODE_ADDRESSES = ['']
 
@@ -8,10 +9,10 @@ class Node:
     It functions both as server and client, simultaneously, and is used to perform validation of blocks
     given the [consensus] protocol.
     """
-    def __init__(self, machine_ip_address) -> None:
+    def __init__(self, machine_ip_address):
         self.ip_address = machine_ip_address
+        self.zmq_context = zmq.Context()
         # TODO: Define what else the constructor should do.
-        pass
 
     def connection_test(self, peer_addresses):
         for peer_address in peer_addresses:
@@ -21,16 +22,25 @@ class Node:
                 # TODO: Send a message to each server and await a response.
                 print(peer_address)
 
-    def request():
-        context = zmq.Context()
-        socket = context.socket(zmq.REQ)
+    def request(self):
+        socket = self.zmq_context.socket(zmq.REQ)
         socket.connect("tcp://10.244.220.176")
         socket.send("Hola")
         print(socket.recv())
 
-    def reply():
-        context = zmq.Context()
-        socket = context.socket(zmq.REP)
+    def reply(self):
+        socket = self.zmq_context.socket(zmq.REP)
         socket.bind("tcp://*:5556")
         req = socket.recv()
         socket.send(req) 
+
+def main(): 
+    print("Select one option: 1. Request; 2. Reply")
+    node = Node()
+    if(len(sys.argv) > 1 ):
+        print("Please enter just one arguyment.")
+    if(sys.argv[1] == '1'):
+        node.request()
+    elif(sys.argv[1] == '2'):
+        node.reply()
+    
