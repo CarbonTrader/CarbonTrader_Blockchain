@@ -1,5 +1,4 @@
 import zmq
-import sys
 
 TEST_NODE_ADDRESSES = ['']
 
@@ -35,13 +34,3 @@ class Node:
         while True:
             req = socket.recv()
             socket.send(req) 
-
-def main(): 
-    print("Select one option: 1. Request; 2. Reply")
-    node = Node()
-    if(len(sys.argv) > 1 ):
-        print("Please enter just one arguyment.")
-    if(sys.argv[1] == '1'):
-        node.request()
-    elif(sys.argv[1] == '2'):
-        node.reply()
