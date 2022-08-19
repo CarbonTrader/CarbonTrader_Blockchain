@@ -24,15 +24,17 @@ class Node:
 
     def request(self):
         socket = self.zmq_context.socket(zmq.REQ)
-        socket.connect("tcp://10.244.220.176")
-        socket.send("Hola")
-        print(socket.recv())
+        socket.connect("tcp://10.244.220.176:5556")
+        for i in range(1,3):
+            socket.send("Hola" + i)
+            print(socket.recv())
 
     def reply(self):
         socket = self.zmq_context.socket(zmq.REP)
         socket.bind("tcp://*:5556")
-        req = socket.recv()
-        socket.send(req) 
+        while True:
+            req = socket.recv()
+            socket.send(req) 
 
 def main(): 
     print("Select one option: 1. Request; 2. Reply")
@@ -43,4 +45,3 @@ def main():
         node.request()
     elif(sys.argv[1] == '2'):
         node.reply()
-    
