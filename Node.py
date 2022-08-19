@@ -25,7 +25,7 @@ class Node:
         socket = self.zmq_context.socket(zmq.REQ)
         socket.connect("tcp://10.244.220.176:5556")
         for i in range(1,3):
-            socket.send("Hola" + i)
+            socket.send_string(f'Hola {i}')
             print(socket.recv())
 
     def reply(self):
