@@ -34,3 +34,4 @@ class Node:
         while True:
             req = socket.recv()
             socket.send(req) 
+            print(req)
