@@ -4,7 +4,7 @@ import concurrent.futures
 # The following constants are standard for the whole network.
 SRC_PORT = 5556
 DST_PORT = 5555
-PEER_ADDRS = ['10.244.220.176', '10.244.169.146']
+PEER_ADDRS = ['10.244.169.146', '10.244.220.176']
 
 class Node:
     """
@@ -32,24 +32,29 @@ class Node:
     'dst_port' is used to listen to incoming data on *any* of the nodes.
     """""
     def listen(self, dst_port):
+        no_data = True
         sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM)
         sock.bind(('0.0.0.0', dst_port))
-        while True:
+        while no_data:
             # TODO: Find out what the 'recv()' argument 1024 (I assume bits) does.
             data = sock.recv(1024)
-            print(data.decode())
+            if(data is not None):
+                no_data = False
+        return data.decode()
 
     """""
     The following function triggers multiple threads:
     One of them listens on the DST_PORT.
     The remaining number, which is linearly dependent on the number of peers (the current not included) on the network, establishes connection with them.
     """""
-
     def execute(self):
         with concurrent.futures.ThreadPoolExecutor() as thread_executor:
-            thread_executor.submit(self.listen, DST_PORT)
+            port_listener = thread_executor.submit(self.listen, DST_PORT)
             for peer_address in PEER_ADDRS:
                 if peer_address == self.ip_address:
                     continue
                 future = thread_executor.submit(self.establish_connection, peer_address, SRC_PORT, DST_PORT)
                 print(future.result())
+            # TODO: Handle TimeOutError for the following function callback.
+            port_listener.result(timeout = 5)
+            thread_executor.shutdown()
