@@ -40,6 +40,7 @@ class Node:
             data = sock.recv(1024)
             if(data is not None):
                 no_data = False
+                print(data.decode())
         return data.decode()
 
     """""
@@ -56,5 +57,5 @@ class Node:
                 future = thread_executor.submit(self.establish_connection, peer_address, SRC_PORT, DST_PORT)
                 print(future.result())
             # TODO: Handle TimeOutError for the following function callback.
-            port_listener.result(timeout = 5)
+            port_listener.result()
             thread_executor.shutdown()
