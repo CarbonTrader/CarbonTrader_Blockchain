@@ -4,6 +4,7 @@ import concurrent.futures
 # The following constants are standard for the whole network.
 SRC_PORT = 5556
 DST_PORT = 5555
+MTCAST_ADDR_GROUP = '10.244.1.1'
 PEER_ADDRS = ['10.244.169.146', '10.244.220.176']
 
 class Node:
@@ -19,17 +20,8 @@ class Node:
         # TODO: Define whatever else the constructor should instantiate.
 
     """""
-    The following function is used for establishing a connection with each of the peers on the network.
-    """""
-    def establish_connection(self, peer_address, src_port, dst_port):
-        sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM)
-        sock.bind(('0.0.0.0', src_port))
-        sock.sendto(b'0', (peer_address, dst_port))
-        return f'Message sent to peer with address {peer_address}'
-
-    """""
     The following function is used to receive the incoming data on the dst_port.
-    'dst_port' is used to listen to incoming data on *any* of the nodes.
+    DST_PORT constant is used to listen to incoming data on *any* of the nodes.
     """""
     def listen(self, dst_port):
         no_data = True
@@ -44,18 +36,43 @@ class Node:
         return data.decode()
 
     """""
-    The following function triggers multiple threads:
+    The following function sends multiple messages.
+    The number of messages sent is identical to the number of peers a node has on the network:
+    i.e. number of nodes in the network - 1.
+    """""
+    def heartbeat(self):
+        sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM)
+        sock.bind(('0.0.0.0', SRC_PORT))
+        for peer_address in PEER_ADDRS:
+            if peer_address == self.ip_address:
+                continue
+            sock.sendto(b'0', (peer_address, DST_PORT))
+            print(f'Message sent to peer with address {peer_address}')
+
+    """""
+    The following function is similar to the one above. 
+    However, this one uses the multicast option to multicast to a group of addresses on the network, rather than sending the message one by one.
+    """""
+    def heartbeat_multicast(self):
+        sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM)
+        sock.bind(('0.0.0.0', SRC_PORT))
+        # TODO: Define the number of hops for the message.
+        sock.setsockopt(Socket.IPPROTO_IP, Socket.IP_MULTICAST_TTL, hops=2)
+        sock.sendto(b'0', (MTCAST_ADDR_GROUP, DST_PORT))
+
+    """""
+    The following function triggers two concurrent threads:
     One of them listens on the DST_PORT.
-    The remaining number, which is linearly dependent on the number of peers (the current not included) on the network, establishes connection with them.
+    The remaining, sends a heartbeat message to each of this node's peers. 
     """""
     def execute(self):
         with concurrent.futures.ThreadPoolExecutor() as thread_executor:
             port_listener = thread_executor.submit(self.listen, DST_PORT)
-            for peer_address in PEER_ADDRS:
-                if peer_address == self.ip_address:
-                    continue
-                future = thread_executor.submit(self.establish_connection, peer_address, SRC_PORT, DST_PORT)
-                print(future.result())
+            
+            thread_executor.submit(self.heartbeat)
+            # thread_executor.submit(self.heartbeat_multicast)
+
+            # 'timeout' parameter sets a timer which, when finishing the countdown, if no data has been received, the thread raises a TimeOutError exception.
             # TODO: Handle TimeOutError for the following function callback.
-            port_listener.result()
-            thread_executor.shutdown()
+            port_listener.result(timeout=10)
+            thread_executor.shutdown(wait=True)
