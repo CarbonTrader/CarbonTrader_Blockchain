@@ -1,5 +1,6 @@
 import socket as Socket
 import concurrent.futures
+import time
 
 # The following constants are standard for the whole network.
 SRC_PORT = 5556
@@ -24,14 +25,12 @@ class Node:
     DST_PORT constant is used to listen to incoming data on *any* of the nodes.
     """""
     def listen(self, dst_port):
-        no_data = True
         sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM)
         sock.bind(('0.0.0.0', dst_port))
-        while no_data:
+        while True:
             # TODO: Find out what the 'recv()' argument 1024 (I assume bits) does.
             data = sock.recv(1024)
             if(data is not None):
-                no_data = False
                 print(data.decode())
         return data.decode()
 
@@ -44,11 +43,13 @@ class Node:
     def heartbeat(self):
         sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM)
         sock.bind(('0.0.0.0', SRC_PORT))
-        for peer_address in PEER_ADDRS:
-            if peer_address == self.ip_address:
-                continue
-            sock.sendto(f'{self.ip_address}'.encode(), (peer_address, DST_PORT))
-            print(f'Message sent to peer with address {peer_address}')
+        while True:
+            time.sleep(5)
+            for peer_address in PEER_ADDRS:
+                if peer_address == self.ip_address:
+                    continue
+                sock.sendto(f'{self.ip_address}'.encode(), (peer_address, DST_PORT))
+                print(f'Message sent to peer with address {peer_address}')
 
     """""
     The following function is similar to the one above. 
