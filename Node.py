@@ -35,6 +35,7 @@ class Node:
                 print(data.decode())
         return data.decode()
 
+    # TODO: For the heartbeat functions, define which kind of loop do they have to be inside of, as well as the frequency of the signal.
     """""
     The following function sends multiple messages.
     The number of messages sent is identical to the number of peers a node has on the network:
