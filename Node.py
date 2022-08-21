@@ -51,7 +51,8 @@ class Node:
 
     """""
     The following function is similar to the one above. 
-    However, this one uses the multicast option to multicast to a group of addresses on the network, rather than sending the message one by one.
+    However, this one uses the multicast option to multicast to a group of addresses on the network, rather
+     than sending the message one by one.
     """""
     def heartbeat_multicast(self):
         sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM)
@@ -72,7 +73,8 @@ class Node:
             thread_executor.submit(self.heartbeat)
             # thread_executor.submit(self.heartbeat_multicast)
 
-            # 'timeout' parameter sets a timer which, when finishing the countdown, if no data has been received, the thread raises a TimeOutError exception.
+            # 'timeout' parameter sets a timer which, when finishing the countdown, 
+            # if no data has been received, the thread raises a TimeOutError exception.
             # TODO: Handle TimeOutError for the following function callback.
             port_listener.result(timeout=10)
             thread_executor.shutdown(wait=True)
