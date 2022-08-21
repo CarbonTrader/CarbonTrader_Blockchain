@@ -46,7 +46,7 @@ class Node:
         for peer_address in PEER_ADDRS:
             if peer_address == self.ip_address:
                 continue
-            sock.sendto(b'0', (peer_address, DST_PORT))
+            sock.sendto(f'{self.ip_address}'.encode(), (peer_address, DST_PORT))
             print(f'Message sent to peer with address {peer_address}')
 
     """""
@@ -59,7 +59,7 @@ class Node:
         sock.bind(('0.0.0.0', SRC_PORT))
         # TODO: Define the number of hops for the message.
         sock.setsockopt(Socket.IPPROTO_IP, Socket.IP_MULTICAST_TTL, hops=2)
-        sock.sendto(b'0', (MTCAST_ADDR_GROUP, DST_PORT))
+        sock.sendto(f'{self.ip_address}'.encode(), (MTCAST_ADDR_GROUP, DST_PORT))
 
     """""
     The following function triggers two concurrent threads:
