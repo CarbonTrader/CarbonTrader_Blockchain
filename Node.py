@@ -31,7 +31,7 @@ class Node:
             # TODO: Find out what the 'recv()' argument 1024 (I assume bits) does.
             data = sock.recv(1024)
             if(data is not None):
-                print(data.decode())
+                print(f'Data received: {data.decode()}')
         return data.decode()
 
     # TODO: For the heartbeat functions, define which kind of loop do they have to be inside of, as well as the frequency of the signal.
