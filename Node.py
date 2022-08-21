@@ -44,12 +44,12 @@ class Node:
         sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM)
         sock.bind(('0.0.0.0', SRC_PORT))
         while True:
-            time.sleep(5)
             for peer_address in PEER_ADDRS:
                 if peer_address == self.ip_address:
                     continue
                 sock.sendto(f'{self.ip_address}'.encode(), (peer_address, DST_PORT))
                 print(f'Message sent to peer with address {peer_address}')
+                time.sleep(5)
 
     """""
     The following function is similar to the one above. 
@@ -72,8 +72,8 @@ class Node:
         with concurrent.futures.ThreadPoolExecutor() as thread_executor:
             port_listener = thread_executor.submit(self.listen, DST_PORT)
             
-            thread_executor.submit(self.heartbeat)
-            # thread_executor.submit(self.heartbeat_multicast)
+            # thread_executor.submit(self.heartbeat)
+            thread_executor.submit(self.heartbeat_multicast)
 
             # 'timeout' parameter sets a timer which, when finishing the countdown, 
             # if no data has been received, the thread raises a TimeOutError exception.
