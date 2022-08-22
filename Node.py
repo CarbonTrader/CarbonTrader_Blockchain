@@ -6,7 +6,8 @@ import struct
 # The following constants are standard for the whole network.
 SRC_PORT = 5556
 DST_PORT = 5555
-MCAST_ADDR_GROUP = '10.244.1.1'
+# MCAST_ADDR_GROUP = '10.244.1.1'
+MCAST_ADDR_GROUP = '224.1.1.1'
 PEER_ADDRS = ['10.244.169.146', '10.244.220.176']
 
 class Node:
@@ -81,6 +82,7 @@ class Node:
         sock.bind(('0.0.0.0', src_port))
         # TODO: Define the number of hops for the message.
         sock.setsockopt(Socket.IPPROTO_IP, Socket.IP_MULTICAST_TTL, hops=2)
+
         while True:
             sock.sendto(f'{self.ip_address}'.encode(), (mcast_group, dst_port))
             print(f'Message sent to group address {mcast_group}')
@@ -94,7 +96,7 @@ class Node:
     def execute(self):
         with concurrent.futures.ThreadPoolExecutor() as thread_executor:
             # port_listener = thread_executor.submit(self.listen, DST_PORT)
-            thread_executor.submit(self.listen_multicast, MCAST_ADDR_GROUP, DST_PORT)
+            port_listener = thread_executor.submit(self.listen_multicast, MCAST_ADDR_GROUP, DST_PORT)
             
             # thread_executor.submit(self.heartbeat, DST_PORT, SRC_PORT)
             thread_executor.submit(self.heartbeat_multicast, MCAST_ADDR_GROUP, DST_PORT, SRC_PORT)
@@ -102,7 +104,5 @@ class Node:
             # 'timeout' parameter sets a timer which, when finishing the countdown, 
             # if no data has been received, the thread raises a TimeOutError exception.
             # TODO: Handle TimeOutError for the following function callback.
-            # port_listener.result(timeout=10)
+            port_listener.result(timeout=10)
             # thread_executor.shutdown(wait=True)
-            while True:
-                pass
