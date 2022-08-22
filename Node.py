@@ -68,7 +68,7 @@ class Node:
                     continue
                 sock.sendto(f'{self.ip_address}'.encode(), (peer_address, dst_port))
                 print(f'Message sent to peer with address {peer_address}')
-                time.sleep(5)
+                time.sleep(1)
 
     """""
     The following function is similar to the one above. 
@@ -108,8 +108,7 @@ class Node:
                     # if no data has been received, the thread raises a TimeOutError exception.
                     # TODO: Handle TimeOutError for the following function callback.
                     port_listener.result(timeout = 10)
-                    thread_executor.shutdown()
             except concurrent.futures.TimeoutError:
                 node_is_alive = False
                 print('Node is dead. Please run again.')
-                thread_executor.shutdown()
+                thread_executor.shutdown(wait = False)
