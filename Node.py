@@ -22,26 +22,20 @@ class Node:
         pass
         # TODO: Define whatever else the constructor should instantiate.
 
-    def listen_iter_wrapper(self, dst_port):
-        data = None
-        sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM)
-        sock.bind(('0.0.0.0', dst_port))
-        while not data:
-            data = sock.recv(1024)
-        return data.decode()
-
     """""
     The following function is used to receive the incoming data on the dst_port.
     DST_PORT constant is used to listen to incoming data on *any* of the nodes.
     """""
-    # def listen(self, dst_port):
-    #     sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM)
-    #     sock.bind(('0.0.0.0', dst_port))
-    #     while True:
-    #         # TODO: Find out what the 'recv()' argument 1024 (I assume bits) does.
-    #         data = sock.recv(1024)
-    #         if(data is not None):
-    #             print(f'Data received: {data.decode()}')
+    def listen(self, dst_port):
+        data = None
+        sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM)
+        sock.bind(('0.0.0.0', dst_port))
+        while data is None:
+            # TODO: Find out what the 'recv()' argument 1024 (I assume bits) does.
+            data = sock.recv(1024)
+            if(data is not None):
+                print(f'Data received: {data.decode()}')
+        return data.decode()
 
     """""
     The following function is used to receive incoming data sent to the multicast group (MTCAST_ADDR_GROUP).
@@ -99,30 +93,23 @@ class Node:
     One of them listens on the DST_PORT.
     The remaining, sends a heartbeat message to each of this node's peers. 
     """""
-    # def execute(self):
-    #     with concurrent.futures.ThreadPoolExecutor() as thread_executor:
-    #         port_listener = thread_executor.submit(self.listen, DST_PORT)
-    #         # thread_executor.submit(self.listen_multicast, MCAST_ADDR_GROUP, DST_PORT)
-            
-    #         thread_executor.submit(self.heartbeat, DST_PORT, SRC_PORT)
-    #         # thread_executor.submit(self.heartbeat_multicast, MCAST_ADDR_GROUP, DST_PORT, SRC_PORT)
-
-    #         # 'timeout' parameter sets a timer which, when finishing the countdown, 
-    #         # if no data has been received, the thread raises a TimeOutError exception.
-    #         # TODO: Handle TimeOutError for the following function callback.
-    #         port_listener.result(timeout=10)
-    #         thread_executor.shutdown(wait=True)
-
     def execute(self):
+        node_is_alive = True
         with concurrent.futures.ThreadPoolExecutor() as thread_executor:
-            port_listener = thread_executor.submit(self.listen_iter_wrapper, DST_PORT)
-            port_listener.result(timeout=10)
-            # thread_executor.submit(self.listen_multicast, MCAST_ADDR_GROUP, DST_PORT)
-            
-            thread_executor.submit(self.heartbeat, DST_PORT, SRC_PORT)
-            # thread_executor.submit(self.heartbeat_multicast, MCAST_ADDR_GROUP, DST_PORT, SRC_PORT)
+            try:
+                while node_is_alive:
+                    port_listener = thread_executor.submit(self.listen, DST_PORT)
+                    # thread_executor.submit(self.listen_multicast, MCAST_ADDR_GROUP, DST_PORT)
+                    
+                    thread_executor.submit(self.heartbeat, DST_PORT, SRC_PORT)
+                    # thread_executor.submit(self.heartbeat_multicast, MCAST_ADDR_GROUP, DST_PORT, SRC_PORT)
 
-            # 'timeout' parameter sets a timer which, when finishing the countdown, 
-            # if no data has been received, the thread raises a TimeOutError exception.
-            # TODO: Handle TimeOutError for the following function callback.
-            thread_executor.shutdown(wait=True)
+                    # 'timeout' parameter sets a timer which, when finishing the countdown, 
+                    # if no data has been received, the thread raises a TimeOutError exception.
+                    # TODO: Handle TimeOutError for the following function callback.
+                    port_listener.result(timeout = 10)
+                    thread_executor.shutdown()
+            except concurrent.futures.TimeoutError:
+                node_is_alive = False
+                print('Node is dead. Please run again.')
+                thread_executor.shutdown()
