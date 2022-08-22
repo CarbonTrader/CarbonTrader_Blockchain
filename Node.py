@@ -6,6 +6,7 @@ import struct
 # The following constants are standard for the whole network.
 SRC_PORT = 5556
 DST_PORT = 5555
+MCAST_PORT = 5557
 # MCAST_ADDR_GROUP = '10.244.1.1'
 MCAST_ADDR_GROUP = '224.1.1.1'
 PEER_ADDRS = ['10.244.169.146', '10.244.220.176']
@@ -39,13 +40,13 @@ class Node:
     """""
     The following function is used to receive incoming data sent to the multicast group (MTCAST_ADDR_GROUP).
     """""
-    def listen_multicast(self, mcast_group, dst_port):
+    def listen_multicast(self, mcast_group, mcast_port):
 
         print('Listener thread launched...')
 
         sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM, Socket.IPPROTO_UDP)
         sock.setsockopt(Socket.SOL_SOCKET, Socket.SO_REUSEADDR, 1)
-        sock.bind(('', dst_port))
+        sock.bind(('', mcast_port))
         mreq = struct.pack("4sl", Socket.inet_aton(mcast_group), Socket.INADDR_ANY)
         sock.setsockopt(Socket.IPPROTO_IP, Socket.IP_ADD_MEMBERSHIP, mreq)
         while True:
@@ -74,17 +75,17 @@ class Node:
     However, this one uses the multicast option to multicast to a group of addresses on the network, rather
      than sending the message one by one.
     """""
-    def heartbeat_multicast(self, mcast_group, dst_port, src_port):
+    def heartbeat_multicast(self, mcast_group, mcast_port):
 
         print('Heartbeat thread launched...')
 
         sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM)
-        sock.bind(('0.0.0.0', src_port))
+        sock.bind(('0.0.0.0', mcast_port))
         # TODO: Define the number of hops for the message.
         sock.setsockopt(Socket.IPPROTO_IP, Socket.IP_MULTICAST_TTL, hops=2)
 
         while True:
-            sock.sendto(f'{self.ip_address}'.encode(), (mcast_group, dst_port))
+            sock.sendto(f'{self.ip_address}'.encode(), (mcast_group, mcast_port))
             print(f'Message sent to group address {mcast_group}')
             time.sleep(5)
 
@@ -96,10 +97,10 @@ class Node:
     def execute(self):
         with concurrent.futures.ThreadPoolExecutor() as thread_executor:
             # port_listener = thread_executor.submit(self.listen, DST_PORT)
-            thread_executor.submit(self.listen_multicast, MCAST_ADDR_GROUP, DST_PORT)
+            thread_executor.submit(self.listen_multicast, MCAST_ADDR_GROUP, MCAST_PORT)
             
             # thread_executor.submit(self.heartbeat, DST_PORT, SRC_PORT)
-            thread_executor.submit(self.heartbeat_multicast, MCAST_ADDR_GROUP, DST_PORT, SRC_PORT)
+            thread_executor.submit(self.heartbeat_multicast, MCAST_ADDR_GROUP, MCAST_PORT)
 
             # 'timeout' parameter sets a timer which, when finishing the countdown, 
             # if no data has been received, the thread raises a TimeOutError exception.
