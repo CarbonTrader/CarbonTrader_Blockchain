@@ -7,7 +7,6 @@ import struct
 SRC_PORT = 5556
 DST_PORT = 5555
 MCAST_PORT = 5557
-# MCAST_ADDR_GROUP = '10.244.1.1'
 MCAST_ADDR_GROUP = '224.1.1.1'
 PEER_ADDRS = ['10.244.169.146', '10.244.220.176']
 
@@ -23,18 +22,26 @@ class Node:
         pass
         # TODO: Define whatever else the constructor should instantiate.
 
+    def listen_iter_wrapper(self, dst_port):
+        data = None
+        sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM)
+        sock.bind(('0.0.0.0', dst_port))
+        while not data:
+            data = sock.recv(1024)
+        return data.decode()
+
     """""
     The following function is used to receive the incoming data on the dst_port.
     DST_PORT constant is used to listen to incoming data on *any* of the nodes.
     """""
-    def listen(self, dst_port):
-        sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM)
-        sock.bind(('0.0.0.0', dst_port))
-        while True:
-            # TODO: Find out what the 'recv()' argument 1024 (I assume bits) does.
-            data = sock.recv(1024)
-            if(data is not None):
-                print(f'Data received: {data.decode()}')
+    # def listen(self, dst_port):
+    #     sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM)
+    #     sock.bind(('0.0.0.0', dst_port))
+    #     while True:
+    #         # TODO: Find out what the 'recv()' argument 1024 (I assume bits) does.
+    #         data = sock.recv(1024)
+    #         if(data is not None):
+    #             print(f'Data received: {data.decode()}')
 
     """""
     The following function is used to receive incoming data sent to the multicast group (MTCAST_ADDR_GROUP).
@@ -92,9 +99,24 @@ class Node:
     One of them listens on the DST_PORT.
     The remaining, sends a heartbeat message to each of this node's peers. 
     """""
+    # def execute(self):
+    #     with concurrent.futures.ThreadPoolExecutor() as thread_executor:
+    #         port_listener = thread_executor.submit(self.listen, DST_PORT)
+    #         # thread_executor.submit(self.listen_multicast, MCAST_ADDR_GROUP, DST_PORT)
+            
+    #         thread_executor.submit(self.heartbeat, DST_PORT, SRC_PORT)
+    #         # thread_executor.submit(self.heartbeat_multicast, MCAST_ADDR_GROUP, DST_PORT, SRC_PORT)
+
+    #         # 'timeout' parameter sets a timer which, when finishing the countdown, 
+    #         # if no data has been received, the thread raises a TimeOutError exception.
+    #         # TODO: Handle TimeOutError for the following function callback.
+    #         port_listener.result(timeout=10)
+    #         thread_executor.shutdown(wait=True)
+
     def execute(self):
         with concurrent.futures.ThreadPoolExecutor() as thread_executor:
-            thread_executor.submit(self.listen, DST_PORT)
+            port_listener = thread_executor.submit(self.listen_iter_wrapper, DST_PORT)
+            port_listener.result(timeout=10)
             # thread_executor.submit(self.listen_multicast, MCAST_ADDR_GROUP, DST_PORT)
             
             thread_executor.submit(self.heartbeat, DST_PORT, SRC_PORT)
@@ -103,5 +125,4 @@ class Node:
             # 'timeout' parameter sets a timer which, when finishing the countdown, 
             # if no data has been received, the thread raises a TimeOutError exception.
             # TODO: Handle TimeOutError for the following function callback.
-            # port_listener.result(timeout=10)
             thread_executor.shutdown(wait=True)
