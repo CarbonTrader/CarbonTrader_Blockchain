@@ -29,15 +29,16 @@ class Node:
     DST_PORT constant is used to listen to incoming data on *any* of the nodes.
     """""
     def listen(self, dst_port):
+
+        print(f'Listener thread: {current_thread().name}')
+
         data = None
         sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM)
         sock.bind(('0.0.0.0', dst_port))
         while data is None:
             # TODO: Find out what the 'recv()' argument 1024 (I assume bits) does.
             data = sock.recv(1024)
-            if(data is not None):
-                print(f'Data received: {data.decode()}')
-        return data.decode()
+        return print('Data received: ' + data.decode())
 
     """""
     The following function is used to receive incoming data sent to the multicast group (MTCAST_ADDR_GROUP).
