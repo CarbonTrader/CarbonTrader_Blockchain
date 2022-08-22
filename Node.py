@@ -1,7 +1,9 @@
 import socket as Socket
 import concurrent.futures
+from threading import current_thread
 import time
 import struct
+import sys
 
 # The following constants are standard for the whole network.
 SRC_PORT = 5556
@@ -60,6 +62,9 @@ class Node:
     i.e. number of nodes in the network - 1.
     """""
     def heartbeat(self, dst_port, src_port):
+        
+        print(f'Heartbeat thread: {current_thread().name}')
+
         sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM)
         sock.bind(('0.0.0.0', src_port))
         while True:
@@ -105,8 +110,7 @@ class Node:
                     # thread_executor.submit(self.heartbeat_multicast, MCAST_ADDR_GROUP, DST_PORT, SRC_PORT)
 
                     # 'timeout' parameter sets a timer which, when finishing the countdown, 
-                    # if no data has been received, the thread raises a TimeOutError exception.
-                    # TODO: Handle TimeOutError for the following function callback.
+                    # if no data has been received, the thread raises a TimeoutError exception.
                     port_listener.result(timeout = 10)
             except concurrent.futures.TimeoutError:
                 node_is_alive = False
