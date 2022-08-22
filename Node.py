@@ -35,7 +35,6 @@ class Node:
             data = sock.recv(1024)
             if(data is not None):
                 print(f'Data received: {data.decode()}')
-        return data.decode()
 
     """""
     The following function is used to receive incoming data sent to the multicast group (MTCAST_ADDR_GROUP).
@@ -75,18 +74,17 @@ class Node:
     However, this one uses the multicast option to multicast to a group of addresses on the network, rather
      than sending the message one by one.
     """""
-    def heartbeat_multicast(self, mcast_group, mcast_port):
+    def heartbeat_multicast(self, mcast_group, dst_port, src_port):
 
         print('Heartbeat thread launched...')
 
         sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM)
-        sock.bind(('0.0.0.0', mcast_port))
+        sock.bind(('0.0.0.0', src_port))
         # TODO: Define the number of hops for the message.
         sock.setsockopt(Socket.IPPROTO_IP, Socket.IP_MULTICAST_TTL, hops=2)
-
         while True:
-            sock.sendto(f'{self.ip_address}'.encode(), (mcast_group, mcast_port))
-            print(f'Message sent to group address {mcast_group}')
+            sock.sendto(f'{self.ip_address}'.encode(), (mcast_group, dst_port))
+            print(f'Message sent to multicast group address {mcast_group}')
             time.sleep(5)
 
     """""
@@ -96,11 +94,11 @@ class Node:
     """""
     def execute(self):
         with concurrent.futures.ThreadPoolExecutor() as thread_executor:
-            # port_listener = thread_executor.submit(self.listen, DST_PORT)
-            thread_executor.submit(self.listen_multicast, MCAST_ADDR_GROUP, MCAST_PORT)
+            thread_executor.submit(self.listen, DST_PORT)
+            # thread_executor.submit(self.listen_multicast, MCAST_ADDR_GROUP, DST_PORT)
             
-            # thread_executor.submit(self.heartbeat, DST_PORT, SRC_PORT)
-            thread_executor.submit(self.heartbeat_multicast, MCAST_ADDR_GROUP, MCAST_PORT)
+            thread_executor.submit(self.heartbeat, DST_PORT, SRC_PORT)
+            # thread_executor.submit(self.heartbeat_multicast, MCAST_ADDR_GROUP, DST_PORT, SRC_PORT)
 
             # 'timeout' parameter sets a timer which, when finishing the countdown, 
             # if no data has been received, the thread raises a TimeOutError exception.
