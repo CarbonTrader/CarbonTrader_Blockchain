@@ -39,9 +39,12 @@ class Node:
     The following function is used to receive incoming data sent to the multicast group (MTCAST_ADDR_GROUP).
     """""
     def listen_multicast(self, mcast_group, dst_port):
+
+        print('Listener thread launched...')
+
         sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM, Socket.IPPROTO_UDP)
         sock.setsockopt(Socket.SOL_SOCKET, Socket.SO_REUSEADDR, 1)
-        sock.bind(('0.0.0.0', dst_port))
+        sock.bind(('', dst_port))
         mreq = struct.pack("4sl", Socket.inet_aton(mcast_group), Socket.INADDR_ANY)
         sock.setsockopt(Socket.IPPROTO_IP, Socket.IP_ADD_MEMBERSHIP, mreq)
         while True:
@@ -71,11 +74,17 @@ class Node:
      than sending the message one by one.
     """""
     def heartbeat_multicast(self, mcast_group, dst_port, src_port):
+
+        print('Heartbeat thread launched...')
+
         sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM)
         sock.bind(('0.0.0.0', src_port))
         # TODO: Define the number of hops for the message.
         sock.setsockopt(Socket.IPPROTO_IP, Socket.IP_MULTICAST_TTL, hops=2)
-        sock.sendto(f'{self.ip_address}'.encode(), (mcast_group, dst_port))
+        while True:
+            sock.sendto(f'{self.ip_address}'.encode(), (mcast_group, dst_port))
+            print(f'Message sent to group address {mcast_group}')
+            time.sleep(5)
 
     """""
     The following function triggers two concurrent threads:
@@ -94,4 +103,6 @@ class Node:
             # if no data has been received, the thread raises a TimeOutError exception.
             # TODO: Handle TimeOutError for the following function callback.
             # port_listener.result(timeout=10)
-            thread_executor.shutdown(wait=True)
+            # thread_executor.shutdown(wait=True)
+            while True:
+                pass
