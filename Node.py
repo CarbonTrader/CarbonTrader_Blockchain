@@ -45,7 +45,7 @@ class Node:
 
         sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM, Socket.IPPROTO_UDP)
         sock.setsockopt(Socket.SOL_SOCKET, Socket.SO_REUSEADDR, 1)
-        sock.bind(('', mcast_port))
+        sock.bind((MCAST_ADDR_GROUP, mcast_port))
         mreq = struct.pack("4sl", Socket.inet_aton(mcast_group), Socket.INADDR_ANY)
         sock.setsockopt(Socket.IPPROTO_IP, Socket.IP_ADD_MEMBERSHIP, mreq)
         while True:
@@ -79,7 +79,7 @@ class Node:
         print('Heartbeat thread launched...')
 
         sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM)
-        sock.bind(('0.0.0.0', src_port))
+        sock.bind((MCAST_ADDR_GROUP, src_port))
         # TODO: Define the number of hops for the message.
         sock.setsockopt(Socket.IPPROTO_IP, Socket.IP_MULTICAST_TTL, hops=2)
         while True:
