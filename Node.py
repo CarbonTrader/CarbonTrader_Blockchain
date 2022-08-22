@@ -72,8 +72,8 @@ class Node:
         with concurrent.futures.ThreadPoolExecutor() as thread_executor:
             port_listener = thread_executor.submit(self.listen, DST_PORT)
             
-            # thread_executor.submit(self.heartbeat)
-            thread_executor.submit(self.heartbeat_multicast)
+            thread_executor.submit(self.heartbeat)
+            # thread_executor.submit(self.heartbeat_multicast)
 
             # 'timeout' parameter sets a timer which, when finishing the countdown, 
             # if no data has been received, the thread raises a TimeOutError exception.
