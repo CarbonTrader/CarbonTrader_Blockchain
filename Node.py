@@ -119,3 +119,7 @@ class Node:
                 print('Node is dead. Stopping all tasks...')
                 thread_executor.shutdown(wait = False)
                 
+                # TODO: Find a way of stopping all currently active threads.
+                print('Currently active threads:')
+                for thread in enumerate():
+                    print(thread.name)
