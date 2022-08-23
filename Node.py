@@ -3,6 +3,7 @@ import concurrent.futures
 from threading import current_thread, enumerate
 import time
 import struct
+from sys import exit
 
 # The following constants are standard for the whole network.
 SRC_PORT = 5556
@@ -76,7 +77,7 @@ class Node:
                 sock.sendto(f'{self.ip_address}'.encode(), (peer_address, dst_port))
                 print(f'Message sent to peer with address {peer_address}')
                 time.sleep(1)
-        return None
+        return
 
     """""
     The following function is similar to the one above. 
@@ -108,17 +109,18 @@ class Node:
                     port_listener_thread = thread_executor.submit(self.listen, DST_PORT)
                     # thread_executor.submit(self.listen_multicast, MCAST_ADDR_GROUP, DST_PORT)
                     
-                    thread_executor.submit(self.heartbeat, DST_PORT, SRC_PORT)
+                    heartbeat_thread = thread_executor.submit(self.heartbeat, DST_PORT, SRC_PORT)
                     # thread_executor.submit(self.heartbeat_multicast, MCAST_ADDR_GROUP, DST_PORT, SRC_PORT)
 
                     # 'timeout' parameter sets a timer which, when finishing the countdown, 
                     # if no data has been received, the thread raises a TimeoutError exception.
                     port_listener_thread.result(timeout = 10)
+                    
             except concurrent.futures.TimeoutError:
                 self.node_is_alive = False
                 print('Node is dead. Stopping all tasks...')
                 thread_executor.shutdown(wait = False)
-                
+
                 # TODO: Find a way of stopping all currently active threads.
                 print('Currently active threads:')
                 for thread in enumerate():
