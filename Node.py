@@ -9,7 +9,7 @@ from sys import exit
 SRC_PORT = 5556
 DST_PORT = 5555
 MCAST_ADDR_GROUP = '224.1.1.1'
-PEER_ADDRS = ['10.244.169.146', '10.244.220.176']
+PEER_ADDRS = ['10.244.169.146', '10.244.220.176', '10.244.126.74']
 
 class Node:
     """
@@ -46,7 +46,7 @@ class Node:
     """""
     def listen_multicast(self, mcast_group, mcast_port):
 
-        print(f'Listener thread: {current_thread().name}')
+        # print(f'Listener thread: {current_thread().name}')
 
         data = None
         sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM, Socket.IPPROTO_UDP)
@@ -83,11 +83,11 @@ class Node:
     """""
     The following function is similar to the one above. 
     However, this one uses the multicast option to multicast to a group of addresses on the network, rather
-     than sending the message one by one.
+    than sending the message one by one.
     """""
     def heartbeat_multicast(self, mcast_group, dst_port, src_port):
 
-        print(f'Heartbeat thread: {current_thread().name}')
+        # print(f'Heartbeat thread: {current_thread().name}')
 
         sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM)
         sock.bind((MCAST_ADDR_GROUP, src_port))
@@ -110,7 +110,7 @@ class Node:
                     # port_listener_thread = thread_executor.submit(self.listen, DST_PORT)
                     port_listener_thread = thread_executor.submit(self.listen_multicast, MCAST_ADDR_GROUP, DST_PORT)
                     
-                    # heartbeat_thread = thread_executor.submit(self.heartbeat, DST_PORT, SRC_PORT)
+                    # thread_executor.submit(self.heartbeat, DST_PORT, SRC_PORT)
                     thread_executor.submit(self.heartbeat_multicast, MCAST_ADDR_GROUP, DST_PORT, SRC_PORT)
 
                     # 'timeout' parameter sets a timer which, when finishing the countdown, 
