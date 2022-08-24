@@ -49,13 +49,16 @@ class Node:
 
         print('Listener thread launched...')
 
+        data = None
+        ttl = struct.pack('b', 1)
         sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM, Socket.IPPROTO_UDP)
-        sock.setsockopt(Socket.SOL_SOCKET, Socket.SO_REUSEADDR, 1)
+        sock.setsockopt(Socket.SOL_SOCKET, Socket.SO_REUSEADDR, ttl)
         sock.bind((MCAST_ADDR_GROUP, mcast_port))
         mreq = struct.pack("4sl", Socket.inet_aton(mcast_group), Socket.INADDR_ANY)
         sock.setsockopt(Socket.IPPROTO_IP, Socket.IP_ADD_MEMBERSHIP, mreq)
-        while True:
-            print(sock.recv(10240))
+        while data is None:
+            data = sock.recv(1024)
+        return print('Data received:' + data.decode())
 
 
     # TODO: For the heartbeat functions, define which kind of loop do they have to be inside of, as well as the frequency of the signal.
@@ -105,16 +108,16 @@ class Node:
     def execute(self):
         with concurrent.futures.ThreadPoolExecutor() as thread_executor:
             try:
-                # while self.node_is_alive:
+                while self.node_is_alive:
                     # port_listener_thread = thread_executor.submit(self.listen, DST_PORT)
-                    thread_executor.submit(self.listen_multicast, MCAST_ADDR_GROUP, DST_PORT)
+                    port_listener_thread = thread_executor.submit(self.listen_multicast, MCAST_ADDR_GROUP, DST_PORT)
                     
                     # heartbeat_thread = thread_executor.submit(self.heartbeat, DST_PORT, SRC_PORT)
                     thread_executor.submit(self.heartbeat_multicast, MCAST_ADDR_GROUP, DST_PORT, SRC_PORT)
 
                     # 'timeout' parameter sets a timer which, when finishing the countdown, 
                     # if no data has been received, the thread raises a TimeoutError exception.
-                    # port_listener_thread.result(timeout = 10)
+                    port_listener_thread.result(timeout = 10)
                     
             except concurrent.futures.TimeoutError:
                 self.node_is_alive = False
