@@ -90,7 +90,6 @@ class Node:
 
         sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM)
         sock.bind((MCAST_ADDR_GROUP, src_port))
-        # TODO: Define the number of hops for the message.
         ttl = struct.pack('b', 1)
         sock.setsockopt(Socket.IPPROTO_IP, Socket.IP_MULTICAST_TTL, ttl)
         while True:
@@ -106,7 +105,7 @@ class Node:
     def execute(self):
         with concurrent.futures.ThreadPoolExecutor() as thread_executor:
             try:
-                while self.node_is_alive:
+                # while self.node_is_alive:
                     # port_listener_thread = thread_executor.submit(self.listen, DST_PORT)
                     thread_executor.submit(self.listen_multicast, MCAST_ADDR_GROUP, DST_PORT)
                     
