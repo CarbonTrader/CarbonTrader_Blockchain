@@ -8,7 +8,6 @@ from sys import exit
 # The following constants are standard for the whole network.
 SRC_PORT = 5556
 DST_PORT = 5555
-MCAST_PORT = 5557
 MCAST_ADDR_GROUP = '224.0.0.1'
 PEER_ADDRS = ['10.244.169.146', '10.244.220.176']
 
@@ -47,12 +46,11 @@ class Node:
     """""
     def listen_multicast(self, mcast_group, mcast_port):
 
-        print('Listener thread launched...')
+        print(f'Listener thread: {current_thread().name}')
 
         data = None
-        ttl = struct.pack('b', 1)
         sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM, Socket.IPPROTO_UDP)
-        sock.setsockopt(Socket.SOL_SOCKET, Socket.SO_REUSEADDR, ttl)
+        sock.setsockopt(Socket.SOL_SOCKET, Socket.SO_REUSEADDR, 1)
         sock.bind((MCAST_ADDR_GROUP, mcast_port))
         mreq = struct.pack("4sl", Socket.inet_aton(mcast_group), Socket.INADDR_ANY)
         sock.setsockopt(Socket.IPPROTO_IP, Socket.IP_ADD_MEMBERSHIP, mreq)
@@ -89,7 +87,7 @@ class Node:
     """""
     def heartbeat_multicast(self, mcast_group, dst_port, src_port):
 
-        print('Heartbeat thread launched...')
+        print(f'Heartbeat thread: {current_thread().name}')
 
         sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM)
         sock.bind((MCAST_ADDR_GROUP, src_port))
