@@ -9,7 +9,7 @@ from sys import exit
 SRC_PORT = 5556
 DST_PORT = 5555
 MCAST_PORT = 5557
-MCAST_ADDR_GROUP = '224.1.1.1'
+MCAST_ADDR_GROUP = '224.0.0.1'
 PEER_ADDRS = ['10.244.169.146', '10.244.220.176']
 
 class Node:
@@ -91,7 +91,8 @@ class Node:
         sock = Socket.socket(Socket.AF_INET, Socket.SOCK_DGRAM)
         sock.bind((MCAST_ADDR_GROUP, src_port))
         # TODO: Define the number of hops for the message.
-        sock.setsockopt(Socket.IPPROTO_IP, Socket.IP_MULTICAST_TTL, hops=2)
+        ttl = struct.pack('b', 1)
+        sock.setsockopt(Socket.IPPROTO_IP, Socket.IP_MULTICAST_TTL, ttl)
         while True:
             sock.sendto(f'{self.ip_address}'.encode(), (mcast_group, dst_port))
             print(f'Message sent to multicast group address {mcast_group}')
@@ -106,15 +107,15 @@ class Node:
         with concurrent.futures.ThreadPoolExecutor() as thread_executor:
             try:
                 while self.node_is_alive:
-                    port_listener_thread = thread_executor.submit(self.listen, DST_PORT)
-                    # thread_executor.submit(self.listen_multicast, MCAST_ADDR_GROUP, DST_PORT)
+                    # port_listener_thread = thread_executor.submit(self.listen, DST_PORT)
+                    thread_executor.submit(self.listen_multicast, MCAST_ADDR_GROUP, DST_PORT)
                     
-                    heartbeat_thread = thread_executor.submit(self.heartbeat, DST_PORT, SRC_PORT)
-                    # thread_executor.submit(self.heartbeat_multicast, MCAST_ADDR_GROUP, DST_PORT, SRC_PORT)
+                    # heartbeat_thread = thread_executor.submit(self.heartbeat, DST_PORT, SRC_PORT)
+                    thread_executor.submit(self.heartbeat_multicast, MCAST_ADDR_GROUP, DST_PORT, SRC_PORT)
 
                     # 'timeout' parameter sets a timer which, when finishing the countdown, 
                     # if no data has been received, the thread raises a TimeoutError exception.
-                    port_listener_thread.result(timeout = 10)
+                    # port_listener_thread.result(timeout = 10)
                     
             except concurrent.futures.TimeoutError:
                 self.node_is_alive = False
