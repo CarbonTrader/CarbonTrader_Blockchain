@@ -8,7 +8,7 @@ from sys import exit
 # The following constants are standard for the whole network.
 SRC_PORT = 5556
 DST_PORT = 5555
-MCAST_ADDR_GROUP = '224.0.0.1'
+MCAST_ADDR_GROUP = '224.1.1.1'
 PEER_ADDRS = ['10.244.169.146', '10.244.220.176']
 
 class Node:
