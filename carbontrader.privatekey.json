@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "carbontrader-1111",
+  "private_key_id": "5cc4b1de162b90d40a103771e3f0d5e6355aa12f",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC6BioP6fbFHS1z\nLuQ8dB51w89uJSLj9AtO7wDFwbWfvg3JXahgNB1BRPn/n2IsWFUGCJ2B97e6zXLA\nWiZPDR2FBpldky85zdDJKRVQIMbpufEkqV+c0yImh3OTq+ma+4PsGLooYZ64wIXH\nBphFsCwoOPEyVDxzyy/jH4iS22EjcBgRkmwv+rEGK9q5AXB0awmgIb14nDTmrjWV\nTkIb4XYcPsGbS0lsZlcc586i95RlB2YbhnO6QRHL6iqk5jEFTYMdKbAxzJhne+eI\n2ZARB2rfPXP1csm+xBrR3x2hzxUOsRTAesmauAUIWUF6l5FOcSbEGTWwqeoXXIKc\ncHTLE/QXAgMBAAECggEAW8zN9hOCBW0sMDLcTB8LpxcN5u+po6+b4wScL3s0G5RJ\nLm2rOWqOY1bcPnMTmgmvT65xuCEciLF5ZwY18H3q6upCRgTr4c05MwQ0sdmy/8WU\nhICXIAerSzM97IqCWkqzpA/h0iq2jrrnabvN6loRuHm9QZaDTKthQuadWcesTLVd\ndRWORyJqPqr9aeeNf+RiSg1uRFMiQebamghfQ6eiYi5fAaTX1gtGI57HLzeATKES\n5hEVftEakKLQ+ZW/jsQfBf2VW8rKJ99EQGLEqcEzhOkIhNTAKinc/HesGyryL4VN\nYKDgpAc9l4V6mcLk5lu3oF6SMdwrri77O98dvkkeOQKBgQDkn+bzrODRcwYru5GH\nqgl4in4T+6Nn/fQ924YVlsrKSMyB97raYyHKCLZ6WBssmY+8CMjNBbpt6D4EN14t\nJeeCdDYS3X9KJWyNUbGSYv8dhbQ71HOERwOq9C9kvDZvv8eqKAljlP0t4/w3HC2O\nbyitHH5XWl7PMAGuPLaTNhRfLwKBgQDQTGpPrKXsd/GSL6xdbByxOuBL4pKI/lvT\nB7z6n8fP/VA98+p4E53QItdNtvQ0DtFUyktKh5e5C6+3FbsDhC612HGlkwX/xDMj\nNI5Jb2fmVhGPkJufcbpPJgJjMVjyWrK2hpVhYHBSmzn0Nx4Vjwrgb+fh0gmx367x\n0Bynd42/mQKBgQCxeDK2KxelXq2GmyZ/8g1CBfeSmX6iBe9naRXvgktOtS4TIXNp\nfRRImXTVCbmmaFm78/GzvOOX13T0nuo7D7ZjfMRQ5qGds+lM1gKKiNBSYWykGOnG\n371IIh78CmITYwKh4kxPgeL6kYRCX1w5ua4QmxKzylHYcQKM91IeehdcPwKBgHZ0\nDjzy7ISWDQ1aCQYzlfl/htAAr94x79wJWYGY3ZM89aXVkO/qD+Ot/IxYT3VPO+Gh\nDMH8a96yc6GFPQ2Z3MpSpQZInq+9Tmtl1siSDx7gsSnYTXeVwCKEdfUcuf1QcLL1\nw/tVUWrYlVN5CKWv67qISPCVdifuEVm4RKNDjJt5AoGBAIdcvOnQbRBrp8iSXdC+\nh75YylAk1LRAtI1ZFck04Wtqf92kQcSfcOB1Zuk7mo80WYQkhAOL8Q9JgdbmzdLl\nVPOainpzFFFBM9hXZzxZvUQhO34aV1t/FaJPUfFpOeRcBV2N4d/YiN4c+Uhx9P2t\n7NHZk/DY3iL0IMVKPB74vvh7\n-----END PRIVATE KEY-----\n",
+  "client_email": "carbontrader-1111@appspot.gserviceaccount.com",
+  "client_id": "112937836146645293582",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/carbontrader-1111%40appspot.gserviceaccount.com"
+}

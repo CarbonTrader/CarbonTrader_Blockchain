@@ -1,0 +1,17 @@
+{
+    "type" : "record",
+    "name" : "Avro",
+    "fields" : [
+      {
+        "name" : "leader_node_id",
+        "type" : "string"
+      },
+      {
+        "name" : "transactions",
+        "type" : {
+          "type" : "array",
+          "items" : "string"
+        }
+      }
+    ]
+  }
