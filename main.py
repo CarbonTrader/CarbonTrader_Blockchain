@@ -1,6 +1,5 @@
 import json
 import random
-import socket
 from concurrent import futures
 from concurrent.futures import ThreadPoolExecutor
 
@@ -8,35 +7,72 @@ from google.auth import jwt
 from google.cloud import pubsub_v1
 
 
-def handle_api_message(message):
-    number_range = message['range']
-    limit = message['limit']
-    winner_id = message['node']
+def handle_consensus_reception(sender, number):
+    global count
+    print('Mensajero: {}, Numero: {}'.format(sender, number))
+    count += 1
+    if count < size:
+        if number > current_winner['number']:
+            current_winner['number'] = number
+            current_winner['sender'] = sender
 
-    if winner_id == node_id:
-        print('winner')
+    if count == size - 1:
+        count = 0
+        data = {
+            'type': 'result_message',
+            'winner_2': current_winner['sender'],
+            'number': current_winner['number']
+        }
+        print('Gano {} con {}'.format(current_winner['sender'], current_winner['number']))
+        message_to_send = json.dumps(data, ensure_ascii=False).encode('utf8')
+        future1 = api_publisher.publish(api_topic_path, message_to_send)
+        future1.result()
+
+
+def handle_api_message(message):
+    print('-----------------------------------------------------------------------------------------------------------')
+    number_range = message['range']
+    winner_id = message['winner_1']
+    size_result = message['size']
+
+    global winner_1
+    winner_1 = winner_id
+
+    if winner_id != node_id:
+        n = random.randint(0, number_range)
+        print('Genere {}'.format(n))
+
+        data = {
+            'type': 'node_message',
+            'sender': node_id,
+            'number': n
+        }
+        print('Enviando mensaje a {}'.format(winner_id))
+        message_to_send = json.dumps(data, ensure_ascii=False).encode('utf8')
+        future1 = api_publisher.publish(api_topic_path, message_to_send)
+        future1.result()
 
     else:
-        n = random.randint(0, number_range)
-        print(n)
-
-        if n > limit:
-            data = {
-                'type': 'node_message',
-                'sender': node_id,
-                'number': n
-            }
-            message_to_send = json.dumps(data, ensure_ascii=False).encode('utf8')
-            future1 = api_publisher.publish(api_topic_path, message_to_send)
-            future1.result()
+        global size
+        size = size_result
+        print('Soy winner 1')
+        print('Esperando numeros de los otros nodos')
 
 
 def handle_node_message(message):
     number = message['number']
     sender = message['sender']
 
-    if sender != node_id:
-        print('Not sender')
+    if winner_1 == node_id:
+        handle_consensus_reception(sender, number)
+
+
+def handle_result_message(message):
+    # number = message['number']
+    winner = message['winner_2']
+
+    if winner == node_id:
+        print('Yo soy el winner 2')
 
 
 def handle_message(message):
@@ -46,6 +82,8 @@ def handle_message(message):
         handle_api_message(message)
     elif message_type == 'node_message':
         handle_node_message(message)
+    elif message_type == 'result_message':
+        handle_result_message(message)
 
 
 def listener_api_messages():
@@ -70,7 +108,6 @@ def listener_api_messages():
 
 
 def callback(message):
-    print('Received %s', message)
     message.ack()
 
     data = json.loads(message.data.decode('utf-8'))
@@ -80,6 +117,12 @@ def callback(message):
 if __name__ == "__main__":
     # node_id = sys.argv[1]
     node_id = 'node1'
+    current_winner = {
+        'sender': '',
+        'number': 0
+    }
+    winner_1 = ''
+    size = 0
 
     # Autenticación
     service_account_info = json.load(open("service-account-info.json"))
@@ -91,9 +134,7 @@ if __name__ == "__main__":
 
     # Estas variables se deben mover a variables de entorno
     project_id = 'flash-ward-360216'
-    hostname = socket.gethostname()
-    ip = socket.gethostbyname(hostname)
-    api_topic_subscription_id = 'vocero-sub-' + ip
+    api_topic_subscription_id = 'vocero-sub-' + node_id
     node_topic_id = 'nodes_info'
     api_topic_id = 'vocero'
 
@@ -110,6 +151,7 @@ if __name__ == "__main__":
     # future = subscriber.subscribe(api_topic_subscription_path, callback=callback)
 
     executor = ThreadPoolExecutor(max_workers=2)
+    count = 0
 
     """ node_messages_thread = threading.Thread(target=listener_api_messages)
     node_messages_thread.start() """
