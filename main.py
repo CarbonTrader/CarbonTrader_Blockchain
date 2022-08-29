@@ -8,6 +8,46 @@ from google.auth import jwt
 from google.cloud import pubsub_v1
 
 
+def handle_api_message(message):
+    number_range = message['range']
+    limit = message['limit']
+    winner_id = message['node']
+
+    if winner_id == node_id:
+        print('winner')
+
+    else:
+        n = random.randint(0, number_range)
+        print(n)
+
+        if n > limit:
+            data = {
+                'type': 'node_message',
+                'sender': node_id,
+                'number': n
+            }
+            message_to_send = json.dumps(data, ensure_ascii=False).encode('utf8')
+            future1 = api_publisher.publish(api_topic_path, message_to_send)
+            future1.result()
+
+
+def handle_node_message(message):
+    number = message['number']
+    sender = message['sender']
+
+    if sender != node_id:
+        print('Not sender')
+
+
+def handle_message(message):
+    message_type = message['type']
+
+    if message_type == 'api_message':
+        handle_api_message(message)
+    elif message_type == 'node_message':
+        handle_node_message(message)
+
+
 def listener_api_messages():
     print('Esperando mensajes de API')
     with subscriber:
@@ -34,19 +74,13 @@ def callback(message):
     message.ack()
 
     data = json.loads(message.data.decode('utf-8'))
-    number_range = data['range']
-    limit = data['limit']
-
-    n = random.randint(0, number_range)
-    print(n)
-
-    if n > limit:
-        message_to_send = str(n).encode("utf-8")
-        future1 = node_publisher.publish(node_topic_path, message_to_send)
-        future1.result()
+    handle_message(data)
 
 
 if __name__ == "__main__":
+    # node_id = sys.argv[1]
+    node_id = 'node1'
+
     # Autenticación
     service_account_info = json.load(open("service-account-info.json"))
     audience = "https://pubsub.googleapis.com/google.pubsub.v1.Subscriber"
