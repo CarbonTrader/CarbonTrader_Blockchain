@@ -31,11 +31,31 @@ def handle_consensus_reception(sender, number):
 
 def handle_api_message(message):
     print('-----------------------------------------------------------------------------------------------------------')
-    number_range = message['range']
-    winner_id = message['winner_1']
+    idtransaction = message['idTransaction']
+    transaction = message['transactions']
+    global size
     size_result = message['size']
 
-    global winner_1
+    print('id: {}'.format(idtransaction))
+    print('transaction: {}'.format(transaction))
+    print(size)
+    if size == 3:
+        print("Llegaron 3 transacciones")
+        number = random.uniform(0, 1)
+        print('Genere:{}'.format(number))
+        size = 1
+        data = {
+            'type': 'node_message',
+            'sender': node_id,
+            'number': number
+        }
+        message_to_send = json.dumps(data, ensure_ascii=False).encode('utf8')
+        future1 = api_publisher.publish(api_topic_path, message_to_send)
+        future1.result()
+
+    else:
+        size+=1
+    """ global winner_1
     winner_1 = winner_id
 
     if winner_id != node_id:
@@ -56,15 +76,24 @@ def handle_api_message(message):
         global size
         size = size_result
         print('Soy winner 1')
-        print('Esperando numeros de los otros nodos')
+        print('Esperando numeros de los otros nodos') """       
 
 
 def handle_node_message(message):
     number = message['number']
     sender = message['sender']
+    consensusNumbers = []
 
-    if winner_1 == node_id:
-        handle_consensus_reception(sender, number)
+    if sender!= node_id:
+        node = {
+            'id': sender,
+            'number':number
+        }
+        consensusNumbers.append(node)
+        print('Emisor: {}, numero: {}'.format(sender,number))
+
+    #if winner_1 == node_id:
+    #   handle_consensus_reception(sender, number)
 
 
 def handle_result_message(message):
@@ -122,7 +151,7 @@ if __name__ == "__main__":
         'number': 0
     }
     winner_1 = ''
-    size = 0
+    size = 1
 
     # Autenticación
     service_account_info = json.load(open("service-account-info.json"))
