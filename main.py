@@ -8,7 +8,6 @@ from concurrent.futures import ThreadPoolExecutor
 import os
 from google.auth import jwt
 from google.cloud import pubsub_v1
-import math
 import json
 
 NODE_ID = 'Node1'
@@ -19,26 +18,6 @@ count = 1
 def handle_consensus_reception(sender, number):
     global count
     print('Mensajero: {}, Numero: {}'.format(sender, number))
-
-
-"""  count += 1
-  #  if count < size:
-  #      if number > current_winner['number']:
-  #          current_winner['number'] = number
-  #          current_winner['sender'] = sender
-
-    if count == size - 1:
-        count = 0
-        data = {
-            'type': 'result_message',
-            'winner_2': current_winner['sender'],
-            'number': current_winner['number']
-        }
-        print('Gano {} con {}'.format(
-            current_winner['sender'], current_winner['number']))
-        message_to_send = json.dumps(data, ensure_ascii=False).encode('utf8')
-        future1 = api_publisher.publish(api_topic_path, message_to_send)
-        future1.result()"""
 
 
 def handle_api_message(message):
@@ -150,16 +129,16 @@ def listener_api_messages():
                 request={"name": api_topic_subscription_path,
                          "topic": api_topic_path}
             )
-            print('Esperando mensajes de API')
-            future = subscriber.subscribe(
-                api_topic_subscription_path, callback=callback)
-            try:
-                future.result()
-            except futures.TimeoutError:
-                future.result()
-                future.cancel()
-                subscriber.delete_subscription(
-                    request={"subscription": api_topic_subscription_path})
+        print('Esperando mensajes de API')
+        future = subscriber.subscribe(
+            api_topic_subscription_path, callback=callback)
+        try:
+            future.result()
+        except futures.TimeoutError:
+            future.result()
+            future.cancel()
+            subscriber.delete_subscription(
+                request={"subscription": api_topic_subscription_path})
 
 
 def callback(message):
