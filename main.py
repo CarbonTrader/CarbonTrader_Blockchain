@@ -7,6 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 import os
 from google.auth import jwt
 from google.cloud import pubsub_v1
+import math
 
 
 def handle_consensus_reception(sender, number):
@@ -59,29 +60,6 @@ def handle_api_message(message):
 
     else:
         count += 1
-    """ global winner_1
-    winner_1 = winner_id
-
-    if winner_id != node_id:
-        n = random.randint(0, number_range)
-        print('Genere {}'.format(n))
-
-        data = {
-            'type': 'node_message',
-            'sender': node_id,
-            'number': n
-        }
-        print('Enviando mensaje a {}'.format(winner_id))
-        message_to_send = json.dumps(data, ensure_ascii=False).encode('utf8')
-        future1 = api_publisher.publish(api_topic_path, message_to_send)
-        future1.result()
-
-    else:
-        global size
-        size = size_result
-        print('Soy winner 1')
-        print('Esperando numeros de los otros nodos') """
-
 
 def handle_node_message(message):
     number = message['number']
@@ -89,13 +67,19 @@ def handle_node_message(message):
     consensusNumbers = []
 
     if sender != node_id:
-        consensusNumbers.append({sender, number})
+        consensusNumbers.append({sender: number})
         print('Emisor: {}, numero: {}'.format(sender, number))
         print('tam:{}'.format(size))
         print('cant-nodes:{}'.format(len(consensusNumbers)))
     if len(consensusNumbers) == size:
         print("Recibí todos los mensajes")
-
+        max = -math.inf
+        winner = ""
+        for k,v in consensusNumbers.items():
+            if v > max:
+                winner = k
+                max = v
+        print("Gano: {}".format(winner))
 
 def handle_result_message(message):
     # number = message['number']
@@ -137,21 +121,21 @@ def listener_api_messages():
                 future.cancel()
                 subscriber.delete_subscription(
                     request={"subscription": api_topic_subscription_path})
-        else:
-            print("Ya estoy suscito")
 
 
 def callback(message):
     message.ack()
     data = json.loads(message.data.decode('utf-8'))
     handle_message(data)
+
+
 def f():
-    print("hello")    
+    print("hello")
 
 
 if __name__ == "__main__":
     # node_id = sys.argv[1]
-    node_id = 'node3'
+    node_id = 'nodeF'
     winner_1 = ''
     count = 1
     size = 0
@@ -187,4 +171,4 @@ if __name__ == "__main__":
     node_me = threading.Thread(target=f)
     node_me.start()
    # executor.submit(listener_api_messages)
-    #listener_api_messages()
+    # listener_api_messages()
