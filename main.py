@@ -1,3 +1,4 @@
+from asyncore import read
 import json
 import random
 import threading
@@ -8,6 +9,11 @@ import os
 from google.auth import jwt
 from google.cloud import pubsub_v1
 import math
+import json
+
+NODE_ID = 'Node1'
+
+count = 1
 
 
 def handle_consensus_reception(sender, number):
@@ -37,21 +43,20 @@ def handle_consensus_reception(sender, number):
 
 def handle_api_message(message):
     print('-----------------------------------------------------------------------------------------------------------')
-    global count, size
+    global count
     idtransaction = message['idTransaction']
     transaction = message['transactions']
-    size = message['tam']
     print('id: {}'.format(idtransaction))
     print('transaction: {}'.format(transaction))
     print(count)
     if count == 3:
         print("Llegaron 3 transacciones")
-        number = random.uniform(0, 1)
+        number = generate_random_number()
         print('Genere:{}'.format(number))
         count = 1
         data = {
             'type': 'node_message',
-            'sender': node_id,
+            'sender': NODE_ID,
             'number': number,
         }
         message_to_send = json.dumps(data, ensure_ascii=False).encode('utf8')
@@ -62,33 +67,67 @@ def handle_api_message(message):
         count += 1
 
 
+def generate_random_number():
+    number = random.uniform(0, 1)
+    nodes = read_json("nodes.json")
+    nodes[NODE_ID] = number
+    write_json("nodes.json", nodes)
+    return number
+
+
+def read_json(filename):
+    with open(filename) as json_file:
+        data = json.load(json_file)
+        return data
+
+
+def write_json(filename, data):
+    with open(filename, 'w') as fp:
+        json.dump(data, fp,  sort_keys=False, indent=4, separators=(',', ': '))
+
+
+def get_consensus_winner():
+    nodes = read_json("nodes.json")
+    max = -2
+    winner = "winner"
+    for k, v in nodes.items():
+        if v > max:
+            max = v
+            winner = k
+    return winner
+
+
+def is_nodes_done(data):
+    for k, v in data.items():
+        if v == -1:
+            return False
+    return True
+
+
 def handle_node_message(message):
     number = message['number']
     sender = message['sender']
-    consensusNumbers = {}
+    nodes = read_json("nodes.json")
 
-    if sender != node_id:
-        consensusNumbers[sender] = number
+    if sender != NODE_ID:
+        nodes[sender] = number
         print('Emisor: {}, numero: {}'.format(sender, number))
-        print('tam:{}'.format(size))
-        print('cant-nodes:{}'.format(len(consensusNumbers)))
-    if len(consensusNumbers) == size:
+        print('cant-nodes:{}'.format(len(nodes)))
+        write_json("nodes.json", nodes)
+
+    print(is_nodes_done(nodes))
+    # TODO: Death nodes
+    if is_nodes_done(nodes):
         print("Recibí todos los mensajes")
-        max = -math.inf
-        winner = ""
-        for k, v in consensusNumbers.items():
-            if v > max:
-                winner = k
-                max = v
-        print("Gano: {}".format(winner))
+        print("Gano: {}".format(get_consensus_winner()))
+        reset_consensus_nodes()
 
 
-def handle_result_message(message):
-    # number = message['number']
-    winner = message['winner_2']
-
-    if winner == node_id:
-        print('Yo soy el winner 2')
+def reset_consensus_nodes():
+    nodes = read_json("nodes.json")
+    for k, _ in nodes.items():
+        nodes[k] = -1
+    write_json("nodes.json", nodes)
 
 
 def handle_message(message):
@@ -98,8 +137,6 @@ def handle_message(message):
         handle_api_message(message)
     elif message_type == 'node_message':
         handle_node_message(message)
-    elif message_type == 'result_message':
-        handle_result_message(message)
 
 
 def listener_api_messages():
@@ -131,13 +168,8 @@ def callback(message):
     handle_message(data)
 
 
-def f():
-    print("hello")
-
-
 if __name__ == "__main__":
     # node_id = sys.argv[1]
-    node_id = 'nodeNe'
     winner_1 = ''
     count = 1
     size = 0
@@ -148,7 +180,7 @@ if __name__ == "__main__":
 
     # Estas variables se deben mover a variables de entorno
     project_id = 'flash-ward-360216'
-    api_topic_subscription_id = 'vocero-sub-' + node_id
+    api_topic_subscription_id = 'vocero-sub-' + NODE_ID
     node_topic_id = 'nodes_info'
     api_topic_id = 'vocero'
 
@@ -170,7 +202,5 @@ if __name__ == "__main__":
     node_messages_thread = threading.Thread(target=listener_api_messages)
     node_messages_thread.start()
 
-    node_me = threading.Thread(target=f)
-    node_me.start()
    # executor.submit(listener_api_messages)
     # listener_api_messages()
