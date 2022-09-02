@@ -1,8 +1,10 @@
 import json
 import random
+import threading
 from concurrent import futures
 from concurrent.futures import ThreadPoolExecutor
 
+import os
 from google.auth import jwt
 from google.cloud import pubsub_v1
 
@@ -10,11 +12,13 @@ from google.cloud import pubsub_v1
 def handle_consensus_reception(sender, number):
     global count
     print('Mensajero: {}, Numero: {}'.format(sender, number))
-    count += 1
-    if count < size:
-        if number > current_winner['number']:
-            current_winner['number'] = number
-            current_winner['sender'] = sender
+
+
+"""  count += 1
+  #  if count < size:
+  #      if number > current_winner['number']:
+  #          current_winner['number'] = number
+  #          current_winner['sender'] = sender
 
     if count == size - 1:
         count = 0
@@ -23,38 +27,38 @@ def handle_consensus_reception(sender, number):
             'winner_2': current_winner['sender'],
             'number': current_winner['number']
         }
-        print('Gano {} con {}'.format(current_winner['sender'], current_winner['number']))
+        print('Gano {} con {}'.format(
+            current_winner['sender'], current_winner['number']))
         message_to_send = json.dumps(data, ensure_ascii=False).encode('utf8')
         future1 = api_publisher.publish(api_topic_path, message_to_send)
-        future1.result()
+        future1.result()"""
 
 
 def handle_api_message(message):
     print('-----------------------------------------------------------------------------------------------------------')
+    global count, size
     idtransaction = message['idTransaction']
     transaction = message['transactions']
-    global size
-    size_result = message['size']
-
+    size = message['tam']
     print('id: {}'.format(idtransaction))
     print('transaction: {}'.format(transaction))
-    print(size)
-    if size == 3:
+    print(count)
+    if count == 3:
         print("Llegaron 3 transacciones")
         number = random.uniform(0, 1)
         print('Genere:{}'.format(number))
-        size = 1
+        count = 1
         data = {
             'type': 'node_message',
             'sender': node_id,
-            'number': number
+            'number': number,
         }
         message_to_send = json.dumps(data, ensure_ascii=False).encode('utf8')
         future1 = api_publisher.publish(api_topic_path, message_to_send)
         future1.result()
 
     else:
-        size+=1
+        count += 1
     """ global winner_1
     winner_1 = winner_id
 
@@ -76,7 +80,7 @@ def handle_api_message(message):
         global size
         size = size_result
         print('Soy winner 1')
-        print('Esperando numeros de los otros nodos') """       
+        print('Esperando numeros de los otros nodos') """
 
 
 def handle_node_message(message):
@@ -84,16 +88,13 @@ def handle_node_message(message):
     sender = message['sender']
     consensusNumbers = []
 
-    if sender!= node_id:
-        node = {
-            'id': sender,
-            'number':number
-        }
-        consensusNumbers.append(node)
-        print('Emisor: {}, numero: {}'.format(sender,number))
-
-    #if winner_1 == node_id:
-    #   handle_consensus_reception(sender, number)
+    if sender != node_id:
+        consensusNumbers.append({sender, number})
+        print('Emisor: {}, numero: {}'.format(sender, number))
+        print('tam:{}'.format(size))
+        print('cant-nodes:{}'.format(len(consensusNumbers)))
+    if len(consensusNumbers) == size:
+        print("Recibí todos los mensajes")
 
 
 def handle_result_message(message):
@@ -116,7 +117,6 @@ def handle_message(message):
 
 
 def listener_api_messages():
-    print('Esperando mensajes de API')
     with subscriber:
         subscriptions = []
         for sub in subscriber.list_subscriptions(request={"project": 'projects/' + project_id}):
@@ -124,42 +124,41 @@ def listener_api_messages():
 
         if api_topic_subscription_path not in subscriptions:
             subscriber.create_subscription(
-                request={"name": api_topic_subscription_path, "topic": api_topic_path}
+                request={"name": api_topic_subscription_path,
+                         "topic": api_topic_path}
             )
-
-        future = subscriber.subscribe(api_topic_subscription_path, callback=callback)
-        try:
-            future.result()
-        except futures.TimeoutError:
-            future.result()
-            future.cancel()
-            subscriber.delete_subscription(request={"subscription": api_topic_subscription_path})
+            print('Esperando mensajes de API')
+            future = subscriber.subscribe(
+                api_topic_subscription_path, callback=callback)
+            try:
+                future.result()
+            except futures.TimeoutError:
+                future.result()
+                future.cancel()
+                subscriber.delete_subscription(
+                    request={"subscription": api_topic_subscription_path})
+        else:
+            print("Ya estoy suscito")
 
 
 def callback(message):
     message.ack()
-
     data = json.loads(message.data.decode('utf-8'))
     handle_message(data)
+def f():
+    print("hello")    
 
 
 if __name__ == "__main__":
     # node_id = sys.argv[1]
-    node_id = 'node1'
-    current_winner = {
-        'sender': '',
-        'number': 0
-    }
+    node_id = 'node3'
     winner_1 = ''
-    size = 1
+    count = 1
+    size = 0
 
     # Autenticación
-    service_account_info = json.load(open("service-account-info.json"))
-    audience = "https://pubsub.googleapis.com/google.pubsub.v1.Subscriber"
-
-    credentials = jwt.Credentials.from_service_account_info(
-        service_account_info, audience=audience
-    )
+    credentials_path = "service-account-info.json"
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials_path
 
     # Estas variables se deben mover a variables de entorno
     project_id = 'flash-ward-360216'
@@ -169,7 +168,8 @@ if __name__ == "__main__":
 
     # Creando el suscriptor
     subscriber = pubsub_v1.SubscriberClient()
-    api_topic_subscription_path = subscriber.subscription_path(project_id, api_topic_subscription_id)
+    api_topic_subscription_path = subscriber.subscription_path(
+        project_id, api_topic_subscription_id)
 
     # Se inicializa el publisher
     node_publisher = pubsub_v1.PublisherClient()
@@ -177,12 +177,14 @@ if __name__ == "__main__":
     api_publisher = pubsub_v1.PublisherClient()
     api_topic_path = api_publisher.topic_path(project_id, api_topic_id)
 
-    # future = subscriber.subscribe(api_topic_subscription_path, callback=callback)
+   #future = subscriber.subscribe(api_topic_subscription_path, callback=callback)
 
-    executor = ThreadPoolExecutor(max_workers=2)
-    count = 0
+   #executor = ThreadPoolExecutor(max_workers=2)
 
-    """ node_messages_thread = threading.Thread(target=listener_api_messages)
-    node_messages_thread.start() """
-    # executor.submit(listener_api_messages)
-    listener_api_messages()
+    node_messages_thread = threading.Thread(target=listener_api_messages)
+    node_messages_thread.start()
+
+    node_me = threading.Thread(target=f)
+    node_me.start()
+   # executor.submit(listener_api_messages)
+    #listener_api_messages()
