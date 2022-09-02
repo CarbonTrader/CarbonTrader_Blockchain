@@ -61,13 +61,14 @@ def handle_api_message(message):
     else:
         count += 1
 
+
 def handle_node_message(message):
     number = message['number']
     sender = message['sender']
-    consensusNumbers = []
+    consensusNumbers = {}
 
     if sender != node_id:
-        consensusNumbers.append({sender: number})
+        consensusNumbers[sender] = number
         print('Emisor: {}, numero: {}'.format(sender, number))
         print('tam:{}'.format(size))
         print('cant-nodes:{}'.format(len(consensusNumbers)))
@@ -75,11 +76,12 @@ def handle_node_message(message):
         print("Recibí todos los mensajes")
         max = -math.inf
         winner = ""
-        for k,v in consensusNumbers.items():
+        for k, v in consensusNumbers.items():
             if v > max:
                 winner = k
                 max = v
         print("Gano: {}".format(winner))
+
 
 def handle_result_message(message):
     # number = message['number']
@@ -135,7 +137,7 @@ def f():
 
 if __name__ == "__main__":
     # node_id = sys.argv[1]
-    node_id = 'nodeF'
+    node_id = 'nodeNe'
     winner_1 = ''
     count = 1
     size = 0
