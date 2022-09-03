@@ -1,6 +1,5 @@
 import json
 import logging
-import random
 import threading
 from concurrent import futures
 
@@ -15,8 +14,9 @@ def node_callback(message):
 
 
 def listener_node_messages():
-    print('Esperando mensajes de Nodos')
-    future = subscriber.subscribe(node_topic_subscription_path, callback=node_callback)
+    #print('Esperando mensajes de Nodos')
+    future = subscriber.subscribe(
+        node_topic_subscription_path, callback=node_callback)
     with subscriber:
         try:
             future.result()
@@ -44,11 +44,12 @@ api_topic_path = publisher.topic_path(project_id, api_topic_id)
 
 # Creando el suscriptor
 subscriber = pubsub_v1.SubscriberClient()
-node_topic_subscription_path = subscriber.subscription_path(project_id, node_topic_subscription_id)
-
+node_topic_subscription_path = subscriber.subscription_path(
+    project_id, node_topic_subscription_id)
 node_messages_thread = threading.Thread(target=listener_node_messages)
 node_messages_thread.start()
-nodes_list = ['node1', 'node2']
+nodes_list = ['node1', 'node2', 'node3']
+transactions = json.load(open("local_transactions.json"))
 
 
 @app.get("/")
@@ -59,15 +60,11 @@ async def root():
 @app.get("/hello/{range_value}")
 async def say_hello(range_value: int):
     publish_futures = []
-    n = random.randint(0, range_value)
-    position = random.randint(0, len(nodes_list) - 1)
-    print(position)
-
     data = {
         "type": 'api_message',
-        "range": range_value,
-        "limit": n,
-        "node": nodes_list[position]
+        "transactions": transactions[range_value],
+        "idTransaction": transactions[range_value]["id"],
+        "tam": len(nodes_list)
     }
 
     message = json.dumps(data, ensure_ascii=False).encode('utf8')
