@@ -65,9 +65,10 @@ def consensus_algorithm():
     future1.result()
     # TODO: Death nodes
     nodes = read_json("nodes.json")
-    while not is_nodes_done(nodes):
+    timeout = time.time() + 60 * 1  # 5 minutes from now
+    while not is_nodes_done(nodes) or time.time() > timeout:
         print("waiting")
-        time.sleep(5)
+        nodes = read_json("nodes.json")
     print("Recibí todos los mensajes")
     print("Gano: {}".format(get_consensus_winner()))
     reset_consensus_nodes()
