@@ -3,8 +3,9 @@ import threading
 import random
 import time
 import json
-NODE_ID = 'Node1'
-MAX_TRANSACTIONS_PER_BLOCK = 3
+
+from Parameters import Parameters
+
 
 class ConsensusController:
     @staticmethod
@@ -28,7 +29,7 @@ class ConsensusController:
         print('Genere:{}'.format(number))
         data = {
             'type': 'consensus_message',
-            'sender': NODE_ID,
+            'sender': Parameters.get_node_id(),
             'number': number,
         }
         message_to_send = json.dumps(data, ensure_ascii=False).encode('utf8')
@@ -41,7 +42,7 @@ class ConsensusController:
     def generate_random_number():
         number = random.uniform(0, 1)
         nodes = DataIntegrator.read_json("nodes.json")
-        nodes[NODE_ID] = number
+        nodes[Parameters.get_node_id()] = number
         DataIntegrator.write_json("nodes.json", nodes)
         return number
 
@@ -69,7 +70,7 @@ class ConsensusController:
         sender = message['sender']
         nodes = DataIntegrator.read_json("nodes.json")
 
-        if sender != NODE_ID:
+        if sender != Parameters.get_node_id():
             nodes[sender] = number
             print('Emisor: {}, numero: {}'.format(sender, number))
             print('cant-nodes:{}'.format(len(nodes)))

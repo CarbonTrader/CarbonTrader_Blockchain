@@ -8,13 +8,13 @@ from pydantic import BaseSettings
 
 from ConsensusController import ConsensusController
 from DataIntegraton import DataIntegrator
+from Parameters import Parameters
 
-NODE_ID = 'Node1'
-MAX_TRANSACTIONS_PER_BLOCK = 3
+
 class Settings(BaseSettings):
     CREDENTIALS_PATH: str
     project_id = 'flash-ward-360216'
-    api_topic_subscription_id = 'vocero-sub-' + NODE_ID
+    api_topic_subscription_id = 'vocero-sub-' + Parameters.get_node_id()
     node_topic_id = 'nodes_info'
     api_topic_id = 'vocero'
 
@@ -42,7 +42,7 @@ def handle_transaction_message(message):
     transactions = DataIntegrator.read_json("local_transactions.json")
     transactions.append(transaction)
     DataIntegrator.write_json("local_transactions.json",transactions)
-    if len(transactions) >= MAX_TRANSACTIONS_PER_BLOCK:
+    if len(transactions) >= Parameters.get_max_transactions_per_block():
         DataIntegrator.update_transactions_to_mine()
         consensus_thread = threading.Thread(target=ConsensusController.consensus_algorithm(api_publisher,api_topic_path))
         consensus_thread.start()
