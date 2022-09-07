@@ -18,9 +18,16 @@ class DataIntegrator:
         for k, _ in nodes.items():
             nodes[k] = -1
         DataIntegrator.write_json("db/nodes.json", nodes)
+    @staticmethod
+    def reset_consensus_winners():
+        nodes = DataIntegrator.read_json("db/winner.json")
+        for k, _ in nodes.items():
+            nodes[k] = ""
+        DataIntegrator.write_json("db/winner.json", nodes)
 
     @staticmethod
     def reset_all():
+        DataIntegrator.reset_consensus_winners()
         DataIntegrator.reset_consensus_nodes()
         DataIntegrator.write_json("db/local_transactions.json", [])
         DataIntegrator.write_json("db/transactions_to_mine.json", [])

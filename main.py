@@ -7,6 +7,7 @@ from google.cloud import pubsub_v1
 from pydantic import BaseSettings
 
 from controllers.ConsensusController import ConsensusController
+from controllers.MiningController import MiningController
 from integrators.DataIntegraton import DataIntegrator
 from integrators.Parameters import Parameters
 
@@ -57,6 +58,8 @@ def handle_message(message):
         handle_transaction_message(message)
     elif message_type == 'consensus_message':
         ConsensusController.handle_consensus_message(message)
+    elif message_type == 'consensus_winner':
+        ConsensusController.handle_consensus_verifier_message(message)
 
 
 def listener_api_messages():
