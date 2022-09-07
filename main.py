@@ -166,6 +166,11 @@ def callback(message):
     data = json.loads(message.data.decode('utf-8'))
     handle_message(data)
 
+def main():
+    node_messages_thread = threading.Thread(target=listener_api_messages)
+    node_messages_thread.start()
 
-node_messages_thread = threading.Thread(target=listener_api_messages)
-node_messages_thread.start()
+if __name__ == "__main__":
+    reset_consensus_nodes()
+    write_json("local_transactions.json",[])
+    main()
