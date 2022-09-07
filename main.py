@@ -2,13 +2,13 @@ import json
 import os
 import threading
 from concurrent import futures
-import time
+
 from google.cloud import pubsub_v1
 from pydantic import BaseSettings
 
-from ConsensusController import ConsensusController
-from DataIntegraton import DataIntegrator
-from Parameters import Parameters
+from controllers.ConsensusController import ConsensusController
+from integrators.DataIntegraton import DataIntegrator
+from integrators.Parameters import Parameters
 
 
 class Settings(BaseSettings):
@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     api_topic_subscription_id = 'vocero-sub-' + Parameters.get_node_id()
     node_topic_id = 'nodes_info'
     api_topic_id = 'vocero'
+
 
 settings = Settings()
 
@@ -33,19 +34,21 @@ api_publisher = pubsub_v1.PublisherClient()
 api_topic_path = api_publisher.topic_path(settings.project_id, settings.api_topic_id)
 
 
-#TODO:Think of what happens when there are enogh transactions for 2 blocks
+# TODO:Think of what happens when there are enogh transactions for 2 blocks
 def handle_transaction_message(message):
     idtransaction = message['idTransaction']
     transaction = message['transactions']
     print('id: {}'.format(idtransaction))
     print('transaction: {}'.format(transaction))
-    transactions = DataIntegrator.read_json("local_transactions.json")
+    transactions = DataIntegrator.read_json("db/local_transactions.json")
     transactions.append(transaction)
-    DataIntegrator.write_json("local_transactions.json",transactions)
+    DataIntegrator.write_json("db/local_transactions.json", transactions)
     if len(transactions) >= Parameters.get_max_transactions_per_block():
         DataIntegrator.update_transactions_to_mine()
-        consensus_thread = threading.Thread(target=ConsensusController.consensus_algorithm(api_publisher,api_topic_path))
+        consensus_thread = threading.Thread(
+            target=ConsensusController.consensus_algorithm(api_publisher, api_topic_path))
         consensus_thread.start()
+
 
 def handle_message(message):
     message_type = message['type']
@@ -88,6 +91,7 @@ def callback(message):
 def main():
     node_messages_thread = threading.Thread(target=listener_api_messages)
     node_messages_thread.start()
+
 
 if __name__ == "__main__":
     DataIntegrator.reset_all()

@@ -14,4 +14,4 @@ $(VENV_NAME)/bin/activate: requirements.txt
 	sudo touch $(VENV_NAME)/bin/activate
 
 serve: prepare_venv
-	CREDENTIALS_PATH="./service-account-info.json" ${PYTHON} -m  main
+	CREDENTIALS_PATH="db/service-account-info.json" ${PYTHON} -m  main
