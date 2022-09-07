@@ -49,8 +49,15 @@ def handle_api_message(message):
 
 def validate_number_transactions(data):
     if len(data) >= MAX_TRANSACTIONS_PER_BLOCK:
+        get_transactions_to_mine()
         consensus_thread = threading.Thread(target=consensus_algorithm())
         consensus_thread.start()
+
+def get_transactions_to_mine():
+    transactions = read_json("local_transactions.json")
+    trans_to_mine = transactions[:3]
+    write_json("local_transactions.json", transactions[3:])
+    write_json("transactions_to_mine.json",transactions[:3])
 
 def consensus_algorithm():
     number = generate_random_number()
@@ -67,12 +74,14 @@ def consensus_algorithm():
     nodes = read_json("nodes.json")
     timeout = time.time() + 60 * 1  # 5 minutes from now
     while not is_nodes_done(nodes) or time.time() > timeout:
-        print("waiting")
+        time.sleep(1)
         nodes = read_json("nodes.json")
     print("Recibí todos los mensajes")
     print("Gano: {}".format(get_consensus_winner()))
     reset_consensus_nodes()
-    write_json("local_transactions.json",[])
+    time.sleep(5)
+    write_json("transactions_to_mine.json",[])
+
 
 def generate_random_number():
     number = random.uniform(0, 1)
@@ -167,11 +176,14 @@ def callback(message):
     data = json.loads(message.data.decode('utf-8'))
     handle_message(data)
 
+def reset_all():
+    reset_consensus_nodes()
+    write_json("local_transactions.json",[])
+    write_json("transactions_to_mine.json",[])
 def main():
     node_messages_thread = threading.Thread(target=listener_api_messages)
     node_messages_thread.start()
 
 if __name__ == "__main__":
-    reset_consensus_nodes()
-    write_json("local_transactions.json",[])
+    reset_all()
     main()
