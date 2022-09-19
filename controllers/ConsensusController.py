@@ -1,3 +1,4 @@
+from blockchain.Blockchain import Blockchain
 from integrators.DataIntegraton import DataIntegrator
 import random
 import time
@@ -25,8 +26,8 @@ class ConsensusController:
         ConsensusController.notify_winner(api_publisher, api_topic_path, winner)
         verify_winner = ConsensusController.establish_winner()
         print(f"Verify winner is : {verify_winner}")
-        #TODO: Start mining
-        #DataIntegrator.write_json("db/transactions_to_mine.json", [])
+        return verify_winner
+
 
     #TODO: REFACTOR
     @staticmethod
