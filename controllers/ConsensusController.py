@@ -6,14 +6,14 @@ import json
 
 from integrators.Parameters import Parameters
 
-
+TIME_OUT = 0.2
 class ConsensusController:
     @staticmethod
     def consensus_algorithm(api_publisher, api_topic_path):
         ConsensusController.broadcast_number(api_publisher,api_topic_path)
         # TODO: Death nodes
         nodes = DataIntegrator.read_json("db/nodes.json")
-        timeout = time.time() + 60 * 0.5  # 5 minutes from now
+        timeout = time.time() + 60 * TIME_OUT  # 5 minutes from now
         while not ConsensusController.is_nodes_done(nodes):
             time.sleep(1)
             print("Consensus: wating for nodes")
@@ -59,7 +59,7 @@ class ConsensusController:
     @staticmethod
     def establish_winner():
         nodes = DataIntegrator.read_json("db/winner.json")
-        timeout = time.time() + 60 * 0.5  # 5 minutes from now
+        timeout = time.time() + 60 * TIME_OUT  # 5 minutes from now
         while not ConsensusController.is_winner_done(nodes):
             time.sleep(1)
             print("Consensus: wating for nodes")

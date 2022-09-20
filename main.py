@@ -39,7 +39,7 @@ api_topic_path = api_publisher.topic_path(settings.project_id, settings.api_topi
 mining_subscriber = pubsub_v1.SubscriberClient()
 mining_sub_path = mining_subscriber.subscription_path(settings.project_id, settings.mining_topic_sub_id)
 mining_publisher = pubsub_v1.PublisherClient()
-mining_topic_path = api_publisher.topic_path(settings.project_id, settings.mining_topic_id)
+mining_topic_path = mining_publisher.topic_path(settings.project_id, settings.mining_topic_id)
 
 
 # TODO:Think of what happens when there are enogh transactions for 2 blocks
@@ -68,7 +68,7 @@ def begin_consensus_thread():
 
 def begin_mining_thread(winner):
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        future = executor.submit(MiningController.begin_mining, winner,  api_publisher, api_topic_path)
+        future = executor.submit(MiningController.begin_mining,  mining_publisher, mining_topic_path, winner)
         result = future.result()
         print(result)
 
