@@ -75,8 +75,9 @@ class MiningController:
     @staticmethod
     def validate_fifty_one_acceptance():
         nodes = DataIntegrator.read_json("db/validation.json")
-        alive_nodes = [node for node in nodes if node != '']
-        fifty_one_percent = len(alive_nodes)/0.51
+        alive_nodes = [v for _, v in nodes.items() if v != '']
+        print(alive_nodes)
+        fifty_one_percent = len(alive_nodes)*0.51
         print(fifty_one_percent)
         print(alive_nodes.count(True))
         if alive_nodes.count(True) >= fifty_one_percent:
