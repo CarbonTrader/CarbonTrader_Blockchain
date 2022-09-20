@@ -23,7 +23,7 @@ class MiningController:
         if winner == Parameters.get_node_id():
             MiningController.mine_new_block(mining_publisher, mining_topic_path, blockchain, transactions_to_mine)
         else:
-            MiningController.validate_new_block(blockchain,transactions_to_mine)
+            MiningController.validate_new_block(blockchain,transactions_to_mine, mining_publisher, mining_topic_path)
         return "done"
 
     @staticmethod
