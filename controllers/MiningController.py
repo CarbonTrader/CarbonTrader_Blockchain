@@ -34,6 +34,7 @@ class MiningController:
         print("a")
         #TODO:
         DataIntegrator.write_json("db/new_block.json", {})
+        DataIntegrator.write_json("db/transactions_to_mine.json", [])
 
     @staticmethod
     def validate_new_block(blockchain, transactions_to_mine):
@@ -43,13 +44,13 @@ class MiningController:
         while not new_block_to_verify:
             time.sleep(1)
             new_block_to_verify = DataIntegrator.read_json("db/new_block.json")
-        time.sleep(5)
         if Block.is_valid_block(new_block_to_verify, blockchain.chain[-1], transactions_to_mine, transactions_hashes):
             print("Block is valid")
         else:
             print("Block is invalid")
         #TODO:
         DataIntegrator.write_json("db/new_block.json", {})
+        DataIntegrator.write_json("db/transactions_to_mine.json",[])
 
     @staticmethod
     def handle_new_block_message(message):
