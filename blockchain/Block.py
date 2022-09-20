@@ -90,10 +90,10 @@ class Block:
             print('The block last_hash is not valid.')
             return False
 
-        reconstructed_hash = CryptoHash.get_hash(new_block.get("timestamp"), new_block.get("last_hash"),
-                                                 new_block.get("merkle_root"),
-                                                 new_block.get("number_transactions"),
-                                                 new_block.get("transactions_hashes"))
+        reconstructed_hash = CryptoHash.get_hash(new_block.get("timestamp"), last_block.hash,
+                                                 reconstructed_merkle,
+                                                 len(transactions),
+                                                 transactions_hashes)
         if new_block.get("hash") != reconstructed_hash:
             print('The block hash is not valid.')
             return False

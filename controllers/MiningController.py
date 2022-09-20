@@ -1,5 +1,6 @@
 import json
 
+from blockchain.Block import Block
 from blockchain.Blockchain import Blockchain
 from integrators.DataIntegraton import DataIntegrator
 from integrators.Parameters import Parameters
@@ -22,7 +23,7 @@ class MiningController:
         if winner == Parameters.get_node_id():
             MiningController.mine_new_block(mining_publisher, mining_topic_path, blockchain, transactions_to_mine)
         else:
-            MiningController.validate_new_block(blockchain)
+            MiningController.validate_new_block(blockchain,transactions_to_mine)
         return "done"
 
     @staticmethod
@@ -33,13 +34,17 @@ class MiningController:
         print("a")
 
     @staticmethod
-    def validate_new_block(blockchain):
-        new_block = DataIntegrator.read_json("db/new_block.json")
+    def validate_new_block(blockchain, transactions_to_mine):
+        transactions_hashes = Blockchain.obtain_transactions_hashes(transactions_to_mine)
+        new_block_to_verify = DataIntegrator.read_json("db/new_block.json")
         #TODO: Set timeout
-        while not new_block:
+        while not new_block_to_verify:
             time.sleep(1)
-            new_block = DataIntegrator.read_json("db/new_block.json")
-        print("Empece a validar")
+            new_block_to_verify = DataIntegrator.read_json("db/new_block.json")
+
+        if Block.is_valid_block(new_block_to_verify, blockchain.chain[-1], transactions_to_mine, transactions_hashes):
+            print("Block is valid")
+
 
     @staticmethod
     def handle_new_block_message(message):
