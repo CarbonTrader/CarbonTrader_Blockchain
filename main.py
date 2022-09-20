@@ -29,15 +29,17 @@ settings = Settings()
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = settings.CREDENTIALS_PATH
 
 # Creando el suscriptor
-subscriber = pubsub_v1.SubscriberClient()
-api_topic_subscription_path = subscriber.subscription_path(
+api_subscriber = pubsub_v1.SubscriberClient()
+api_topic_subscription_path = api_subscriber.subscription_path(
     settings.project_id, settings.api_topic_subscription_id)
-mining_sub = subscriber.subscription_path(settings.project_id, settings.mining_topic_sub_id)
-
-# Se inicializa el publisher
 api_publisher = pubsub_v1.PublisherClient()
 api_topic_path = api_publisher.topic_path(settings.project_id, settings.api_topic_id)
-mining_pub = api_publisher.topic_path(settings.project_id, settings.mining_topic_id)
+
+#Mining init
+mining_subscriber = pubsub_v1.SubscriberClient()
+mining_sub_path = mining_subscriber.subscription_path(settings.project_id, settings.mining_topic_sub_id)
+mining_publisher = pubsub_v1.PublisherClient()
+mining_topic_path = api_publisher.topic_path(settings.project_id, settings.mining_topic_id)
 
 
 # TODO:Think of what happens when there are enogh transactions for 2 blocks
@@ -66,7 +68,7 @@ def begin_consensus_thread():
 
 def begin_mining_thread(winner):
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        future = executor.submit(MiningController.begin_mining, winner)
+        future = executor.submit(MiningController.begin_mining, winner,  api_publisher, api_topic_path)
         result = future.result()
         print(result)
 
@@ -84,31 +86,44 @@ def handle_message(message):
         MiningController.handle_new_block_message(message)
 
 
-def listener_api_messages():
-    with subscriber:
+def create_subscription(subscriber, topic_sub_path, topic_path):
+    subscriber.create_subscription(
+        request={"name": topic_sub_path,
+                 "topic": topic_path}
+    )
+
+def listener_transactions_messages():
+    with api_subscriber, mining_subscriber:
         subscriptions = []
-
-
-        for sub in subscriber.list_subscriptions(request={"project": 'projects/' + settings.project_id}):
+        for sub in api_subscriber.list_subscriptions(request={"project": 'projects/' + settings.project_id}):
             subscriptions.append(sub.name)
 
         if api_topic_subscription_path in subscriptions:
-            subscriber.delete_subscription(request={"subscription": api_topic_subscription_path})
+            api_subscriber.delete_subscription(request={"subscription": api_topic_subscription_path})
 
-        subscriber.create_subscription(
-            request={"name": api_topic_subscription_path,
-                     "topic": api_topic_path}
-        )
+        if mining_sub_path in subscriptions:
+            mining_subscriber.delete_subscription(request={"subscription": mining_sub_path})
+
+        create_subscription(api_subscriber,api_topic_subscription_path, api_topic_path)
+        create_subscription(mining_subscriber,mining_sub_path, mining_topic_path)
+
         print('Esperando mensajes de API')
-        future = subscriber.subscribe(
+        future = api_subscriber.subscribe(
+            api_topic_subscription_path, callback=callback)
+        future2 = mining_subscriber.subscribe(
             api_topic_subscription_path, callback=callback)
         try:
             future.result()
+            future2.result()
         except futures.TimeoutError:
             future.result()
+            future2.result()
             future.cancel()
-            subscriber.delete_subscription(
+            future2.cancel()
+            api_subscriber.delete_subscription(
                 request={"subscription": api_topic_subscription_path})
+            mining_subscriber.delete_subscription( request={"subscription": mining_sub_path})
+
 
 
 def callback(message):
@@ -118,7 +133,7 @@ def callback(message):
 
 
 def main():
-    node_messages_thread = threading.Thread(target=listener_api_messages)
+    node_messages_thread = threading.Thread(target=listener_transactions_messages)
     node_messages_thread.start()
 
 
