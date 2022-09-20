@@ -55,7 +55,7 @@ class MiningController:
             print("Block is invalid")
         DataIntegrator.persist_validation(is_valid, Parameters.get_node_id())
         MiningController.broadcast_validation(mining_publisher, mining_topic_path, is_valid)
-
+        MiningController.fetch_nodes_validation()
         #TODO:
         DataIntegrator.write_json("db/new_block.json", {})
         DataIntegrator.write_json("db/transactions_to_mine.json",[])
