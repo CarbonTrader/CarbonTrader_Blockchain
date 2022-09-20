@@ -68,7 +68,7 @@ class MiningController:
         while not MiningController.is_validation_done(nodes):
             time.sleep(1)
             print("Validation: wating for nodes")
-            nodes = DataIntegrator.read_json("db/winner.json")
+            nodes = DataIntegrator.read_json("db/validation.json")
             if time.time() > timeout:
                 break
         MiningController.validate_fifty_one_acceptance()
