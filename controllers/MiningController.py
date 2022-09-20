@@ -33,6 +33,7 @@ class MiningController:
         new_block = blockchain.create_not_verify_block(transactions_hashes)
         MiningController.broadcast_new_block(mining_publisher, mining_topic_path, new_block)
         print("a")
+        MiningController.validate_new_block(blockchain, transactions_to_mine, mining_publisher, mining_topic_path)
         #TODO:
         DataIntegrator.write_json("db/new_block.json", {})
         DataIntegrator.write_json("db/transactions_to_mine.json", [])
@@ -71,7 +72,11 @@ class MiningController:
             nodes = DataIntegrator.read_json("db/validation.json")
             if time.time() > timeout:
                 break
-        MiningController.validate_fifty_one_acceptance()
+        is_valid = MiningController.validate_fifty_one_acceptance()
+        if is_valid:
+            print("Unir al blockchain!")
+        else:
+            print("Pedir al API nuevo blockchain")
     @staticmethod
     def validate_fifty_one_acceptance():
         nodes = DataIntegrator.read_json("db/validation.json")
@@ -82,17 +87,16 @@ class MiningController:
         print(alive_nodes.count(True))
         if alive_nodes.count(True) >= fifty_one_percent:
             print("We are valid")
+            return True
         else:
             print("we are invalid")
+            return False
 
     @staticmethod
     def is_validation_done(nodes):
-        missing_nodes = 0
         print(nodes.items())
         for k, v in nodes.items():
             if v == "":
-                missing_nodes += 1
-            if missing_nodes > 1:
                 return False
         return True
 
