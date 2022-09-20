@@ -41,6 +41,11 @@ class DataIntegrator:
         DataIntegrator.write_json("db/validation.json", nodes)
 
     @staticmethod
+    def update_blockchain(chain):
+        print(chain)
+        DataIntegrator.write_json("db/blockchain.json",chain)
+
+    @staticmethod
     def reset_all():
         DataIntegrator.reset_consensus_winners()
         DataIntegrator.reset_consensus_nodes()

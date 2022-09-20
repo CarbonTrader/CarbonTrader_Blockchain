@@ -56,7 +56,7 @@ class MiningController:
         is_valid = MiningController.fetch_nodes_validation()
         if is_valid:
             blockchain.add_block(new_block_to_verify)
-            blockchain.update_chain_file()
+            DataIntegrator.update_blockchain(blockchain.chain)
         else:
             print("Finalizar?")
         #TODO:

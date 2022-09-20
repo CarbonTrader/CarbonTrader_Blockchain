@@ -27,7 +27,7 @@ class Blockchain:
 
     def update_chain_file(self):
         with open("db/blockchain.json", "w") as outfile:
-            outfile.write(json.dumps([block.__dict__ for block in self.chain], sort_keys=False, indent=4, separators=(',', ': ')))
+            outfile.write(json.dumps([block for block in self.chain], sort_keys=False, indent=4, separators=(',', ': ')))
 
     def upload_blockchain(self):
         with open("db/blockchain.json") as json_file:
