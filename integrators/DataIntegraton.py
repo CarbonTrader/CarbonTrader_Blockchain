@@ -56,9 +56,9 @@ class DataIntegrator:
         DataIntegrator.write_json("db/local_transactions.json", transactions[3:])
         DataIntegrator.write_json("db/transactions_to_mine.json", transactions[:3])
     @staticmethod
-    def persist_validation(validation):
+    def persist_validation(validation, node_id):
         nodes = DataIntegrator.read_json("db/validation.json")
-        nodes[Parameters.get_node_id()] = validation
+        nodes[node_id] = validation
         DataIntegrator.write_json("db/validation.json",nodes)
     @staticmethod
     def fetch_transactions_to_mine():

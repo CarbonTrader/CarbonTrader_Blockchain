@@ -50,7 +50,7 @@ class MiningController:
             is_valid = True
         else:
             print("Block is invalid")
-        DataIntegrator.persist_validation(is_valid)
+        DataIntegrator.persist_validation(is_valid, Parameters.get_node_id())
         #TODO:
         DataIntegrator.write_json("db/new_block.json", {})
         DataIntegrator.write_json("db/transactions_to_mine.json",[])
@@ -63,6 +63,26 @@ class MiningController:
 
         if sender != Parameters.get_node_id():
             DataIntegrator.write_json("db/new_block.json", new_block)
+
+    @staticmethod
+    def handle_validation_message(message):
+        validation = message['validation']
+        sender = message['sender']
+
+        if sender != Parameters.get_node_id():
+            DataIntegrator.persist_validation(validation, sender)
+
+
+    @staticmethod
+    def broadcast_validation(mining_publisher, mining_topic_path, validation):
+        data = {
+            'type': 'validation',
+            'sender': Parameters.get_node_id(),
+            'validation': validation,
+        }
+        message_to_send = json.dumps(data, ensure_ascii=False).encode('utf8')
+        future1 = mining_publisher.publish(mining_topic_path, message_to_send)
+        future1.result()
 
     @staticmethod
     def broadcast_new_block(mining_publisher, mining_topic_path, new_block):

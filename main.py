@@ -84,6 +84,8 @@ def handle_message(message):
         ConsensusController.handle_consensus_verifier_message(message)
     elif message_type == 'new_block':
         MiningController.handle_new_block_message(message)
+    elif message_type == 'validation':
+        MiningController.handle_validation_message(message)
 
 
 def create_subscription(subscriber, topic_sub_path, topic_path):
