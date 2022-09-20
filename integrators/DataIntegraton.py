@@ -37,7 +37,7 @@ class DataIntegrator:
     def reset_validation():
         nodes = DataIntegrator.read_json("db/validation.json")
         for k, _ in nodes.items():
-            nodes[k] = False
+            nodes[k] = ""
         DataIntegrator.write_json("db/validation.json", nodes)
 
     @staticmethod

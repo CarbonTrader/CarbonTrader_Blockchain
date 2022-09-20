@@ -6,6 +6,7 @@ from integrators.DataIntegraton import DataIntegrator
 from integrators.Parameters import Parameters
 import time
 
+
 class MiningController:
     @staticmethod
     def begin_mining(mining_publisher, mining_topic_path, winner):
@@ -57,6 +58,39 @@ class MiningController:
         DataIntegrator.write_json("db/new_block.json", {})
         DataIntegrator.write_json("db/transactions_to_mine.json",[])
 
+    @staticmethod
+    def fetch_nodes_validation():
+        nodes = DataIntegrator.read_json("db/validation.json")
+        timeout = time.time() + 60 * Parameters.get_time_out()  # 5 minutes from now
+        while not MiningController.is_validation_done(nodes):
+            time.sleep(1)
+            print("Validation: wating for nodes")
+            nodes = DataIntegrator.read_json("db/winner.json")
+            if time.time() > timeout:
+                break
+        MiningController.validate_fifty_one_acceptance()
+    @staticmethod
+    def validate_fifty_one_acceptance():
+        nodes = DataIntegrator.read_json("db/validation.json")
+        alive_nodes = [node for node in nodes if node != '']
+        fifty_one_percent = len(alive_nodes)/0.51
+        if alive_nodes.count(True) >= fifty_one_percent:
+            print("We are valid")
+        else:
+            print("we are invalid")
+
+
+
+
+    @staticmethod
+    def is_validation_done(nodes):
+        missing_nodes = 0
+        for k, v in nodes.items():
+            if v == "":
+                missing_nodes += 1
+            if missing_nodes > 1:
+                return False
+        return True
 
     @staticmethod
     def handle_new_block_message(message):
