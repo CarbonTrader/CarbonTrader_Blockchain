@@ -34,11 +34,11 @@ class MiningController:
 
     @staticmethod
     def validate_new_block(blockchain):
-        new_block = DataIntegrator.read_json("db/new_block2.json")
+        new_block = DataIntegrator.read_json("db/new_block.json")
         #TODO: Set timeout
         while not new_block:
             time.sleep(1)
-            new_block = DataIntegrator.read_json("db/new_block2.json")
+            new_block = DataIntegrator.read_json("db/new_block.json")
         print("Empece a validar")
 
     @staticmethod
@@ -47,7 +47,7 @@ class MiningController:
         sender = message['sender']
 
         if sender != Parameters.get_node_id():
-            DataIntegrator.write_json("db/new_block2.json", new_block)
+            DataIntegrator.write_json("db/new_block.json", new_block)
 
     @staticmethod
     def broadcast_new_block(mining_publisher, mining_topic_path, new_block):
