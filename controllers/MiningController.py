@@ -34,10 +34,7 @@ class MiningController:
         MiningController.broadcast_new_block(mining_publisher, mining_topic_path, new_block)
         print("a")
         MiningController.validate_new_block(blockchain, transactions_to_mine, mining_publisher, mining_topic_path)
-        #TODO:
-        DataIntegrator.write_json("db/new_block.json", {})
-        DataIntegrator.write_json("db/transactions_to_mine.json", [])
-        DataIntegrator.reset_validation()
+
 
 
     @staticmethod
@@ -56,7 +53,12 @@ class MiningController:
             print("Block is invalid")
         DataIntegrator.persist_validation(is_valid, Parameters.get_node_id())
         MiningController.broadcast_validation(mining_publisher, mining_topic_path, is_valid)
-        MiningController.fetch_nodes_validation()
+        is_valid = MiningController.fetch_nodes_validation()
+        if is_valid:
+            blockchain.add_block(new_block_to_verify)
+            blockchain.update_chain_file()
+        else:
+            print("Finalizar?")
         #TODO:
         DataIntegrator.write_json("db/new_block.json", {})
         DataIntegrator.write_json("db/transactions_to_mine.json",[])
@@ -75,8 +77,11 @@ class MiningController:
         is_valid = MiningController.validate_fifty_one_acceptance()
         if is_valid:
             print("Unir al blockchain!")
+            return True
+
         else:
             print("Pedir al API nuevo blockchain")
+            return False
     @staticmethod
     def validate_fifty_one_acceptance():
         nodes = DataIntegrator.read_json("db/validation.json")
