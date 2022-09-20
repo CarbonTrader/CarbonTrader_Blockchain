@@ -77,17 +77,17 @@ class MiningController:
         nodes = DataIntegrator.read_json("db/validation.json")
         alive_nodes = [node for node in nodes if node != '']
         fifty_one_percent = len(alive_nodes)/0.51
+        print(fifty_one_percent)
+        print(alive_nodes.count(True))
         if alive_nodes.count(True) >= fifty_one_percent:
             print("We are valid")
         else:
             print("we are invalid")
 
-
-
-
     @staticmethod
     def is_validation_done(nodes):
         missing_nodes = 0
+        print(nodes.items())
         for k, v in nodes.items():
             if v == "":
                 missing_nodes += 1
