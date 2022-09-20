@@ -37,7 +37,7 @@ class MiningController:
         DataIntegrator.write_json("db/transactions_to_mine.json", [])
 
     @staticmethod
-    def validate_new_block(blockchain, transactions_to_mine):
+    def validate_new_block(blockchain, transactions_to_mine, mining_publisher, mining_topic_path):
         transactions_hashes = Blockchain.obtain_transactions_hashes(transactions_to_mine)
         new_block_to_verify = DataIntegrator.read_json("db/new_block.json")
         is_valid = False
@@ -51,6 +51,8 @@ class MiningController:
         else:
             print("Block is invalid")
         DataIntegrator.persist_validation(is_valid, Parameters.get_node_id())
+        MiningController.broadcast_validation(mining_publisher, mining_topic_path, is_valid)
+
         #TODO:
         DataIntegrator.write_json("db/new_block.json", {})
         DataIntegrator.write_json("db/transactions_to_mine.json",[])
