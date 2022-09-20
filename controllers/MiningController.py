@@ -36,6 +36,8 @@ class MiningController:
         #TODO:
         DataIntegrator.write_json("db/new_block.json", {})
         DataIntegrator.write_json("db/transactions_to_mine.json", [])
+        DataIntegrator.reset_validation()
+
 
     @staticmethod
     def validate_new_block(blockchain, transactions_to_mine, mining_publisher, mining_topic_path):
@@ -57,6 +59,7 @@ class MiningController:
         #TODO:
         DataIntegrator.write_json("db/new_block.json", {})
         DataIntegrator.write_json("db/transactions_to_mine.json",[])
+        DataIntegrator.reset_validation()
 
     @staticmethod
     def fetch_nodes_validation():
