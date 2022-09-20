@@ -40,17 +40,21 @@ class MiningController:
     def validate_new_block(blockchain, transactions_to_mine):
         transactions_hashes = Blockchain.obtain_transactions_hashes(transactions_to_mine)
         new_block_to_verify = DataIntegrator.read_json("db/new_block.json")
+        is_valid = False
         #TODO: Set timeout
         while not new_block_to_verify:
             time.sleep(1)
             new_block_to_verify = DataIntegrator.read_json("db/new_block.json")
         if Block.is_valid_block(new_block_to_verify, blockchain.chain[-1], transactions_to_mine, transactions_hashes):
             print("Block is valid")
+            is_valid = True
         else:
             print("Block is invalid")
+        DataIntegrator.persist_validation(is_valid)
         #TODO:
         DataIntegrator.write_json("db/new_block.json", {})
         DataIntegrator.write_json("db/transactions_to_mine.json",[])
+
 
     @staticmethod
     def handle_new_block_message(message):

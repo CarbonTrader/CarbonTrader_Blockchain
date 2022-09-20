@@ -1,5 +1,8 @@
 import json
 
+from integrators.Parameters import Parameters
+
+
 class DataIntegrator:
     @staticmethod
     def read_json(filename):
@@ -31,12 +34,20 @@ class DataIntegrator:
         DataIntegrator.write_json("db/winner.json", nodes)
 
     @staticmethod
+    def reset_validation():
+        nodes = DataIntegrator.read_json("db/validation.json")
+        for k, _ in nodes.items():
+            nodes[k] = False
+        DataIntegrator.write_json("db/validation.json", nodes)
+
+    @staticmethod
     def reset_all():
         DataIntegrator.reset_consensus_winners()
         DataIntegrator.reset_consensus_nodes()
         DataIntegrator.write_json("db/local_transactions.json", [])
         DataIntegrator.write_json("db/transactions_to_mine.json", [])
         DataIntegrator.write_json("db/new_block.json", {})
+        DataIntegrator.reset_validation()
 
     @staticmethod
     def update_transactions_to_mine():
@@ -44,7 +55,11 @@ class DataIntegrator:
         trans_to_mine = transactions[:3]
         DataIntegrator.write_json("db/local_transactions.json", transactions[3:])
         DataIntegrator.write_json("db/transactions_to_mine.json", transactions[:3])
-
+    @staticmethod
+    def persist_validation(validation):
+        nodes = DataIntegrator.read_json("db/validation.json")
+        nodes[Parameters.get_node_id()] = validation
+        DataIntegrator.write_json("db/validation.json",nodes)
     @staticmethod
     def fetch_transactions_to_mine():
         return DataIntegrator.read_json('db/transactions_to_mine.json')
