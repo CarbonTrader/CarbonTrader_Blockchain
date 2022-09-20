@@ -36,6 +36,7 @@ class DataIntegrator:
         DataIntegrator.reset_consensus_nodes()
         DataIntegrator.write_json("db/local_transactions.json", [])
         DataIntegrator.write_json("db/transactions_to_mine.json", [])
+        DataIntegrator.write_json("db/new_block.json", {})
 
     @staticmethod
     def update_transactions_to_mine():

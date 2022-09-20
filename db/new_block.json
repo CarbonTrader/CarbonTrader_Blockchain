@@ -1,12 +1,1 @@
-{
-    "timestamp": 1663635149796875400,
-    "last_hash": "a571e724db5acd737c9e45f798dae743aed2d55484567f1d307521673c5b39ee",
-    "hash": "8a96c6d25f035e25133bbc35c3d32e69e5ea10ad191fb5d89d26e9757bbd8396",
-    "merkle_root": "c169c9e51987562ba3d05530fef5e41281f5375f8272d7a2636ad4521db0cff4",
-    "number_transactions": 3,
-    "transactions_hashes": [
-        "9619080cb9de9002862c765702a2f8e792289fb4eaa2729815be374bc3a15e2d",
-        "b520b9cd53ddd41761c1fedc0b7e1825fd74737f51edef7fb470571bb7d48088",
-        "c13fb035a7b1e254a9faf4403af93d34d3b6f44a9b67037f7166a7bdaa55a384"
-    ]
-}
+{}

@@ -54,7 +54,7 @@ class MiningController:
         data = {
             'type': 'new_block',
             'sender': Parameters.get_node_id(),
-            'number': new_block.__dict__,
+            'new_block': new_block.__dict__,
         }
         message_to_send = json.dumps(data, ensure_ascii=False).encode('utf8')
         future1 = mining_publisher.publish(mining_topic_path, message_to_send)

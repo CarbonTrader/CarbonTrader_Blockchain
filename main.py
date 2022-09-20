@@ -68,7 +68,7 @@ def begin_consensus_thread():
 
 def begin_mining_thread(winner):
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        future = executor.submit(MiningController.begin_mining,  mining_publisher, mining_topic_path, winner)
+        future = executor.submit(MiningController.begin_mining,  api_publisher, api_topic_path, winner)
         result = future.result()
         print(result)
 
