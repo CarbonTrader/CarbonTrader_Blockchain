@@ -67,12 +67,11 @@ class Merkle:
 
 def main():
     t = [
-        "5fb7f28bac287f888c976a6cf8085fb44ae7566d444628d9d9debdfbae8b313d",
-        "6a555b78b00f38f8a12eb29b7d7be29bb98eb0cbdc1caaf69fbd0645f1239474",
-        "8abc511c85bf8bc496e8e0e84b595c87f37fd8647c7aca06f25e2de4d501ac3f",
-        "fa022ec86427f766b9767f124b98fe15b00216e1dd4fdc9270780bb958171fbf",
-        "056907b33f71a108f4f4ac9e093a3ad29e6e9237aebc82d77f2cff6818230adc",
+        "3e558a9229fa8badb85fdc3a9b1446d5b52a6e2e551ef79084b226c8477d57e3",
+        "8a18f0bf6f2a7e7d4963a173ef3ad5c028de501d34a5439fac13cfc10ea43fc4",
+        "26c4cd9b81416ee20d4f8e1edd428d9ec3ad3c8f2237824e3faecb692d20b2c6"
     ]
+    """
     import random
     import requests
     URL = "https://blockchain.info/rawblock/000000000000000000079b7da5cea599464404dbe339759919e00b48f15f8290?cors=true"
@@ -92,6 +91,10 @@ def main():
     print(merkle_proof_)
     if Merkle.merkle_proof_root(merkle_proof_,tx) == oficial_merkle_root:
         print("True")
+    """
+    print(Merkle.merkle_root(t))
+    if "07050499354913a7fdd3c939e6f800d573cdba97177186c3095b08d138d44b90" == "07050499354913a7fdd3c939e6f800d573cdba97177186c3095b08d138d44b90":
+        print("yeah")
 
 if __name__ == "__main__":
     main()

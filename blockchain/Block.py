@@ -82,6 +82,8 @@ class Block:
                 return False
 
         reconstructed_merkle = Merkle.merkle_root(transactions_hashes[:])
+        print(reconstructed_merkle)
+        print(new_block)
         if reconstructed_merkle != new_block.get("merkle_root"):
             print('The merkle root is not valid.')
             return False
