@@ -32,7 +32,9 @@ class MiningController:
     @staticmethod
     def mine_new_block(mining_publisher, mining_topic_path, blockchain, transactions_to_mine):
         transactions_hashes = Blockchain.obtain_transactions_hashes(transactions_to_mine)
+        print("Generating new block...")
         new_block = blockchain.create_not_verify_block(transactions_hashes)
+        print("Broadcasting new block...")
         MiningController.broadcast_new_block(mining_publisher, mining_topic_path, new_block)
         MiningController.validate_new_block(blockchain, transactions_to_mine, mining_publisher, mining_topic_path)
 

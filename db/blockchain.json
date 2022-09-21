@@ -6,5 +6,17 @@
         "merkle_root": null,
         "number_transactions": 0,
         "transactions_hashes": []
+    },
+    {
+        "timestamp": 1663776747443915200,
+        "last_hash": "a571e724db5acd737c9e45f798dae743aed2d55484567f1d307521673c5b39ee",
+        "hash": "ade1ecb5ffee06fec9a96344fc0ea0d4b4f22295fecdc20273a1dfa8ec35a030",
+        "merkle_root": "0af26fa856900e1c075b39d6557757dab6efaba80cfdefb41bca1543f724550e",
+        "number_transactions": 3,
+        "transactions_hashes": [
+            "d458ba483ac62f374123961d13d3b20d1f048c836aa41857cbe6e3f2e068c297",
+            "81427d51e48467f5b17ed77712ed5728cc8e810dd1537bf958e1e7e9f051768f",
+            "58dee343c7ea8d06855500347ec283c38253e6a9480385e03908466aea1cdd6c"
+        ]
     }
 ]
