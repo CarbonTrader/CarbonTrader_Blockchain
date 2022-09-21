@@ -75,8 +75,6 @@ class Block:
 
     @staticmethod
     def is_valid_block(new_block, last_block, transactions, transactions_hashes):
-        print(new_block)
-        print(last_block)
         for transaction in transactions:
             if not Block.is_valid_signature(transaction.get("public_key"), transaction, transaction.get("signature")):
                 print(f'The transaction {transaction.get("id")} is not valid.')
