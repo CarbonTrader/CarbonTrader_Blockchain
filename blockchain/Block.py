@@ -75,7 +75,8 @@ class Block:
 
     @staticmethod
     def is_valid_block(new_block, last_block, transactions, transactions_hashes):
-
+        print(new_block)
+        print(last_block)
         for transaction in transactions:
             if not Block.is_valid_signature(transaction.get("public_key"), transaction, transaction.get("signature")):
                 print(f'The transaction {transaction.get("id")} is not valid.')
@@ -94,8 +95,17 @@ class Block:
                                                  reconstructed_merkle,
                                                  len(transactions),
                                                  transactions_hashes)
+
+        reconstructed_last_hash = CryptoHash.get_hash(last_block.timestamp, last_block.last_hash,
+                                                 last_block.merkle_root,
+                                                 last_block.number_transactions,
+                                                 last_block.transactions_hashes)
         if new_block.get("hash") != reconstructed_hash:
             print('The block hash is not valid.')
+            return False
+
+        if last_block.get("hash") != reconstructed_last_hash:
+            print('The last block hash is not valid.')
             return False
 
         return True
