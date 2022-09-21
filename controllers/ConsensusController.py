@@ -9,6 +9,7 @@ from integrators.Parameters import Parameters
 class ConsensusController:
     @staticmethod
     def consensus_algorithm(api_publisher, api_topic_path):
+        print("Consensus algo. begin...")
         ConsensusController.broadcast_number(api_publisher,api_topic_path)
         # TODO: Death nodes
         nodes = DataIntegrator.read_json("db/nodes.json")
@@ -31,6 +32,7 @@ class ConsensusController:
     #TODO: REFACTOR
     @staticmethod
     def notify_winner(api_publisher, api_topic_path, winner):
+        print("Notifying winner... ")
         winner_nodes = DataIntegrator.read_json("db/winner.json")
         winner_nodes[Parameters.get_node_id()] = winner
         DataIntegrator.write_json("db/winner.json", winner_nodes)
@@ -46,6 +48,7 @@ class ConsensusController:
     def broadcast_number(api_publisher, api_topic_path):
         number = ConsensusController.generate_random_number()
         print('Genere:{}'.format(number))
+        print("Broadcasting number...")
         data = {
             'type': 'consensus_message',
             'sender': Parameters.get_node_id(),
@@ -57,6 +60,7 @@ class ConsensusController:
 
     @staticmethod
     def establish_winner():
+        print("Establishing winner...")
         nodes = DataIntegrator.read_json("db/winner.json")
         timeout = time.time() + 60 * Parameters.get_time_out()  # 5 minutes from now
         while not ConsensusController.is_winner_done(nodes):
@@ -128,7 +132,6 @@ class ConsensusController:
         if sender != Parameters.get_node_id():
             nodes[sender] = number
             print('Emisor: {}, numero: {}'.format(sender, number))
-            print('cant-nodes:{}'.format(len(nodes)))
             DataIntegrator.write_json("db/nodes.json", nodes)
 
     @staticmethod

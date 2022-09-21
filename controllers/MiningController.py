@@ -10,6 +10,7 @@ import time
 class MiningController:
     @staticmethod
     def begin_mining(mining_publisher, mining_topic_path, winner):
+        print("Begin mining...")
         blockchain = Blockchain()
         blockchain.upload_blockchain()
         try:
@@ -22,6 +23,7 @@ class MiningController:
         transactions_to_mine = DataIntegrator.fetch_transactions_to_mine()
         print("winner: "+ winner)
         if winner == Parameters.get_node_id():
+            print("Mining....")
             MiningController.mine_new_block(mining_publisher, mining_topic_path, blockchain, transactions_to_mine)
         else:
             MiningController.validate_new_block(blockchain,transactions_to_mine, mining_publisher, mining_topic_path)
@@ -32,13 +34,13 @@ class MiningController:
         transactions_hashes = Blockchain.obtain_transactions_hashes(transactions_to_mine)
         new_block = blockchain.create_not_verify_block(transactions_hashes)
         MiningController.broadcast_new_block(mining_publisher, mining_topic_path, new_block)
-        print("a")
         MiningController.validate_new_block(blockchain, transactions_to_mine, mining_publisher, mining_topic_path)
 
 
 
     @staticmethod
     def validate_new_block(blockchain, transactions_to_mine, mining_publisher, mining_topic_path):
+        print("Validating...")
         transactions_hashes = Blockchain.obtain_transactions_hashes(transactions_to_mine)
         new_block_to_verify = DataIntegrator.read_json("db/new_block.json")
         is_valid = False
@@ -52,13 +54,16 @@ class MiningController:
         else:
             print("Block is invalid")
         DataIntegrator.persist_validation(is_valid, Parameters.get_node_id())
+        print("Broadcasting my validation...")
         MiningController.broadcast_validation(mining_publisher, mining_topic_path, is_valid)
+        print("Reciving validations from nodes...")
         is_valid = MiningController.fetch_nodes_validation()
         if is_valid:
             blockchain.add_block(new_block_to_verify)
             DataIntegrator.update_blockchain(blockchain.chain)
+            print("Nodes agreed valid block.")
         else:
-            print("Finalizar?")
+            print("Nodes agreed invalid block.")
         #TODO:
         DataIntegrator.write_json("db/new_block.json", {})
         DataIntegrator.write_json("db/transactions_to_mine.json",[])
@@ -84,6 +89,7 @@ class MiningController:
             return False
     @staticmethod
     def validate_fifty_one_acceptance():
+        print("Validating 51% acceptance...")
         nodes = DataIntegrator.read_json("db/validation.json")
         alive_nodes = [v for _, v in nodes.items() if v != '']
         print(alive_nodes)
