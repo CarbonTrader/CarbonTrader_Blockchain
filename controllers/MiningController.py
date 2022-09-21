@@ -5,7 +5,7 @@ from blockchain.Blockchain import Blockchain
 from integrators.DataIntegraton import DataIntegrator
 from integrators.Parameters import Parameters
 import time
-
+import requests
 
 class MiningController:
     @staticmethod
@@ -22,12 +22,13 @@ class MiningController:
             exit()
         transactions_to_mine = DataIntegrator.fetch_transactions_to_mine()
         print("winner: "+ winner)
+        is_agreed_valid = False
         if winner == Parameters.get_node_id():
             print("Mining....")
-            MiningController.mine_new_block(mining_publisher, mining_topic_path, blockchain, transactions_to_mine)
+            is_agreed_valid = MiningController.mine_new_block(mining_publisher, mining_topic_path, blockchain, transactions_to_mine)
         else:
-            MiningController.validate_new_block(blockchain,transactions_to_mine, mining_publisher, mining_topic_path)
-        return "done"
+            is_agreed_valid = MiningController.validate_new_block(blockchain,transactions_to_mine, mining_publisher, mining_topic_path)
+        return is_agreed_valid
 
     @staticmethod
     def mine_new_block(mining_publisher, mining_topic_path, blockchain, transactions_to_mine):
@@ -36,8 +37,17 @@ class MiningController:
         new_block = blockchain.create_not_verify_block(transactions_hashes)
         print("Broadcasting new block...")
         MiningController.broadcast_new_block(mining_publisher, mining_topic_path, new_block)
-        MiningController.validate_new_block(blockchain, transactions_to_mine, mining_publisher, mining_topic_path)
-
+        is_agreed_valid = MiningController.validate_new_block(blockchain, transactions_to_mine, mining_publisher, mining_topic_path)
+        if is_agreed_valid:
+            #TODO: Update backup
+            blockchain = DataIntegrator.read_json("db/blockchain.json")
+            r = requests.post(url=Parameters.get_url_backup(), json=blockchain)
+        else:
+            #TODO: Get info from backup
+            blockchain = requests.get(Parameters.get_url_backup())
+            print(blockchain)
+            pass
+        return is_agreed_valid
 
 
     @staticmethod
@@ -59,17 +69,26 @@ class MiningController:
         print("Broadcasting my validation...")
         MiningController.broadcast_validation(mining_publisher, mining_topic_path, is_valid)
         print("Reciving validations from nodes...")
-        is_valid = MiningController.fetch_nodes_validation()
-        if is_valid:
-            blockchain.add_block(new_block_to_verify)
-            DataIntegrator.update_blockchain(blockchain.chain)
+        is_agreed_valid = MiningController.fetch_nodes_validation()
+        if is_agreed_valid:
+            MiningController.update_blockchain(blockchain,new_block_to_verify, is_valid)
             print("Nodes agreed valid block.")
         else:
             print("Nodes agreed invalid block.")
-        #TODO:
-        DataIntegrator.write_json("db/new_block.json", {})
-        DataIntegrator.write_json("db/transactions_to_mine.json",[])
-        DataIntegrator.reset_validation()
+            #TODO: Restart consensus algo.
+        DataIntegrator.reset_mining()
+        return is_agreed_valid
+
+    @staticmethod
+    def update_blockchain(blockchain, new_block, is_valid):
+        if is_valid:
+            blockchain.add_block(new_block)
+            DataIntegrator.update_blockchain(blockchain.chain)
+            print("Blockchain updated")
+        else:
+            print("Blockchain alter, must receive new.")
+            #TODO: Ask for back up
+
 
     @staticmethod
     def fetch_nodes_validation():

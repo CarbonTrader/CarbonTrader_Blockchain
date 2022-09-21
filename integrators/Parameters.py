@@ -1,6 +1,7 @@
 NODE_ID = 'Node1'
 MAX_TRANSACTIONS_PER_BLOCK = 3
 TIME_OUT = 0.2
+URL_BACKUP = "localhost:8000/blockchain/backup"
 
 class Parameters:
     @staticmethod
@@ -14,4 +15,6 @@ class Parameters:
     @staticmethod
     def get_time_out():
         return TIME_OUT
-
+    @staticmethod
+    def get_url_backup():
+        return URL_BACKUP

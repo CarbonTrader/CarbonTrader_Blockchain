@@ -42,7 +42,6 @@ class DataIntegrator:
 
     @staticmethod
     def update_blockchain(chain):
-        print(chain)
         DataIntegrator.write_json("db/blockchain.json",chain)
 
     @staticmethod
@@ -52,6 +51,11 @@ class DataIntegrator:
         DataIntegrator.write_json("db/local_transactions.json", [])
         DataIntegrator.write_json("db/transactions_to_mine.json", [])
         DataIntegrator.write_json("db/new_block.json", {})
+        DataIntegrator.reset_validation()
+    @staticmethod
+    def reset_mining():
+        DataIntegrator.write_json("db/new_block.json", {})
+        DataIntegrator.write_json("db/transactions_to_mine.json",[])
         DataIntegrator.reset_validation()
 
     @staticmethod
