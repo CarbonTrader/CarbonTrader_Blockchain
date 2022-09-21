@@ -40,11 +40,13 @@ class MiningController:
         is_agreed_valid = MiningController.validate_new_block(blockchain, transactions_to_mine, mining_publisher, mining_topic_path)
         if is_agreed_valid:
             #TODO: Update backup
+            print("Updating blockchain")
             blockchain = DataIntegrator.read_json("db/blockchain.json")
-            r = requests.post(url=Parameters.get_url_backup(), json=blockchain)
+            #r = requests.post(url=Parameters.get_url_backup(), json=blockchain)
         else:
             #TODO: Get info from backup
-            blockchain = requests.get(Parameters.get_url_backup())
+            #blockchain = requests.get(Parameters.get_url_backup())
+            print("Asking for replacement")
             print(blockchain)
             pass
         return is_agreed_valid
@@ -56,10 +58,13 @@ class MiningController:
         transactions_hashes = Blockchain.obtain_transactions_hashes(transactions_to_mine)
         new_block_to_verify = DataIntegrator.read_json("db/new_block.json")
         is_valid = False
-        #TODO: Set timeout
+        timeout = time.time() + 60 * Parameters.get_time_out()  # 5 minutes from now
         while not new_block_to_verify:
             time.sleep(1)
             new_block_to_verify = DataIntegrator.read_json("db/new_block.json")
+            if time.time() > timeout:
+                break
+                #TODO: Restart
         if Block.is_valid_block(new_block_to_verify, blockchain.chain[-1], transactions_to_mine, transactions_hashes):
             print("Block is valid")
             is_valid = True
