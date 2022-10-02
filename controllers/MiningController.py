@@ -63,7 +63,6 @@ class MiningController:
             #TODO: Get info from backup
             #blockchain = requests.get(Parameters.get_url_backup())
             logger.info("Asking API for replacement")
-            print(blockchain)
             pass
         return is_agreed_valid
 
@@ -106,7 +105,7 @@ class MiningController:
             DataIntegrator.update_blockchain(blockchain.chain)
             logger.info("Blockchain updated.")
         else:
-            logger.info("Blockchain alter, must receive new.")
+            logger.warning("Blockchain alter, must receive new.")
             #TODO: Ask for back up
 
 
@@ -130,10 +129,7 @@ class MiningController:
         logger.info("Validating 51% acceptance.")
         nodes = DataIntegrator.read_json("db/validation.json")
         alive_nodes = [v for _, v in nodes.items() if v != '']
-        print(alive_nodes)
         fifty_one_percent = len(alive_nodes)*0.51
-        print(fifty_one_percent)
-        print(alive_nodes.count(True))
         if alive_nodes.count(True) >= fifty_one_percent:
             return True
         else:
@@ -141,7 +137,6 @@ class MiningController:
 
     @staticmethod
     def is_validation_done(nodes):
-        print(nodes.items())
         for k, v in nodes.items():
             if v == "":
                 return False
