@@ -1,7 +1,19 @@
 import json
+import logging
 
-from integrators.Parameters import Parameters
+#Initialize logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s, %(name)s %(levelname)s : %(message)s')
+file_handler = logging.FileHandler('db/blockchain.log')
+file_handler.setLevel(logging.DEBUG)
+file_handler.setFormatter(formatter)
 
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+logger.addHandler(stream_handler)
 
 class DataIntegrator:
     @staticmethod
@@ -11,7 +23,7 @@ class DataIntegrator:
                 data = json.load(json_file)
                 return data
         except:
-            print("There was a problem fetching the json file")
+            logger.error(f"There was a problem fetching {filename} the json file")
             return None
     @staticmethod
     def write_json(filename, data):
@@ -19,7 +31,7 @@ class DataIntegrator:
             with open(filename, 'w') as fp:
                 json.dump(data, fp, sort_keys=False, indent=4, separators=(',', ': '))
         except:
-            print("There was a problem writing the json file")
+            logger.error(f"There was a problem writing the {filename} json file")
     @staticmethod
     def reset_consensus_nodes():
         nodes = DataIntegrator.read_json("db/nodes.json")

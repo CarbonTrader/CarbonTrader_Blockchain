@@ -1,38 +1,52 @@
 from blockchain.Blockchain import Blockchain
-from integrators.DataIntegraton import DataIntegrator
+from integrators.DataIntegrator import DataIntegrator
 import random
 import time
 import json
-
+import logging
 from integrators.Parameters import Parameters
 
+#Initialize logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s, %(name)s %(levelname)s : %(message)s')
+file_handler = logging.FileHandler('db/blockchain.log')
+file_handler.setLevel(logging.DEBUG)
+file_handler.setFormatter(formatter)
+
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+logger.addHandler(stream_handler)
 class ConsensusController:
     @staticmethod
     def consensus_algorithm(api_publisher, api_topic_path):
-        print("Consensus algo. begin...")
-        ConsensusController.broadcast_number(api_publisher,api_topic_path)
+        logger.info("Starting consensus algorithm.")
+        ConsensusController.broadcast_number(api_publisher, api_topic_path)
         # TODO: Death nodes
         nodes = DataIntegrator.read_json("db/nodes.json")
         timeout = time.time() + 60 * Parameters.get_time_out()  # 5 minutes from now
         while not ConsensusController.is_nodes_done(nodes):
             time.sleep(1)
-            print("Consensus: wating for nodes")
+            logger.info("Waiting for random number from nodes.")
             nodes = DataIntegrator.read_json("db/nodes.json")
             if time.time() > timeout:
                 break
         winner = ConsensusController.get_consensus_winner()
-        print("Gano: {}".format(winner))
+        logger.info("Unverified winner {}.".format(winner))
         DataIntegrator.reset_consensus_nodes()
-        ConsensusController.notify_winner(api_publisher, api_topic_path, winner)
+        ConsensusController.notify_winner(
+            api_publisher, api_topic_path, winner)
         verify_winner = ConsensusController.establish_winner()
-        print(f"Verify winner is : {verify_winner}")
+        logger.info(f"Verify winner {verify_winner}.")
         return verify_winner
 
-
     #TODO: REFACTOR
+
     @staticmethod
     def notify_winner(api_publisher, api_topic_path, winner):
-        print("Notifying winner... ")
+        logger.info("Notifying nodes about the local winner.")
         winner_nodes = DataIntegrator.read_json("db/winner.json")
         winner_nodes[Parameters.get_node_id()] = winner
         DataIntegrator.write_json("db/winner.json", winner_nodes)
@@ -44,11 +58,12 @@ class ConsensusController:
         message_to_send = json.dumps(data, ensure_ascii=False).encode('utf8')
         future1 = api_publisher.publish(api_topic_path, message_to_send)
         future1.result()
+
     @staticmethod
     def broadcast_number(api_publisher, api_topic_path):
         number = ConsensusController.generate_random_number()
-        print('Genere:{}'.format(number))
-        print("Broadcasting number...")
+        logger.info('Local number generated for consensus algorithm {}.'.format(number))
+        logger.info("Broadcasting local number.")
         data = {
             'type': 'consensus_message',
             'sender': Parameters.get_node_id(),
@@ -60,26 +75,22 @@ class ConsensusController:
 
     @staticmethod
     def establish_winner():
-        print("Establishing winner...")
+        logger.info("Establishing with the global winner nodes.")
         nodes = DataIntegrator.read_json("db/winner.json")
         timeout = time.time() + 60 * Parameters.get_time_out()  # 5 minutes from now
         while not ConsensusController.is_winner_done(nodes):
             time.sleep(1)
-            print("Consensus: wating for nodes")
+            logger.info("Waiting for response from nodes about winner.")
             nodes = DataIntegrator.read_json("db/winner.json")
             if time.time() > timeout:
                 break
         if ConsensusController.verify_consensus_winner():
-            print("Se verifico que gano: {}".format(nodes[Parameters.get_node_id()]))
             DataIntegrator.reset_consensus_winners()
             return nodes[Parameters.get_node_id()]
         return None
 
-
-
     @staticmethod
     def is_winner_done(data):
-        winner = data[Parameters.get_node_id()]
         for k, v in data.items():
             if v == "":
                 return False
@@ -113,15 +124,12 @@ class ConsensusController:
                 winner = k
         return winner
 
-
     @staticmethod
     def is_nodes_done(data):
         for k, v in data.items():
             if v == -1:
                 return False
         return True
-
-
 
     @staticmethod
     def handle_consensus_message(message):
@@ -131,7 +139,7 @@ class ConsensusController:
 
         if sender != Parameters.get_node_id():
             nodes[sender] = number
-            print('Emisor: {}, numero: {}'.format(sender, number))
+            logger.info('Sending node {}, consensus number {}'.format(sender, number))
             DataIntegrator.write_json("db/nodes.json", nodes)
 
     @staticmethod

@@ -6,11 +6,25 @@ from concurrent import futures
 
 from google.cloud import pubsub_v1
 from pydantic import BaseSettings
-
+import logging
 from controllers.ConsensusController import ConsensusController
 from controllers.MiningController import MiningController
-from integrators.DataIntegraton import DataIntegrator
+from integrators.DataIntegrator import DataIntegrator
 from integrators.Parameters import Parameters
+
+#Initialize logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s, %(name)s %(levelname)s : %(message)s')
+file_handler = logging.FileHandler('db/blockchain.log')
+file_handler.setLevel(logging.DEBUG)
+file_handler.setFormatter(formatter)
+
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+logger.addHandler(stream_handler)
 
 
 class Settings(BaseSettings):
@@ -44,10 +58,8 @@ mining_topic_path = mining_publisher.topic_path(settings.project_id, settings.mi
 
 # TODO:Think of what happens when there are enogh transactions for 2 blocks
 def handle_transaction_message(message):
-    idtransaction = message['idTransaction']
     transaction = message['transactions']
-    print('id: {}'.format(idtransaction))
-    print('transaction: {}'.format(transaction))
+    logger.info(f'Transaction received {transaction}')
     transactions = DataIntegrator.read_json("db/local_transactions.json")
     transactions.append(transaction)
     DataIntegrator.write_json("db/local_transactions.json", transactions)
@@ -108,7 +120,7 @@ def listener_transactions_messages():
         create_subscription(api_subscriber,api_topic_subscription_path, api_topic_path)
         create_subscription(mining_subscriber,mining_sub_path, mining_topic_path)
 
-        print('Esperando mensajes de API')
+        logger.info('Waiting for transactions.')
         future = api_subscriber.subscribe(
             api_topic_subscription_path, callback=callback)
         future2 = mining_subscriber.subscribe(
@@ -134,10 +146,12 @@ def callback(message):
 
 
 def main():
+    logger.info("Starting server.")
     node_messages_thread = threading.Thread(target=listener_transactions_messages)
     node_messages_thread.start()
 
 
 if __name__ == "__main__":
+    logger.info("Resetting mining values.")
     DataIntegrator.reset_all()
     main()
