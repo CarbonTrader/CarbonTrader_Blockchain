@@ -6,53 +6,5 @@
         "merkle_root": null,
         "number_transactions": 0,
         "transactions_hashes": []
-    },
-    {
-        "timestamp": 1664764571831554659,
-        "last_hash": "a571e724db5acd737c9e45f798dae743aed2d55484567f1d307521673c5b39ee",
-        "hash": "fe805d59b09fbe2b8531f270ff7d7be4ce42be966a29e32846b1a420df6a1f6c",
-        "merkle_root": "2184f3f7143257ab75eb081d93b2f71807914743b303f187544e7b9650d914a1",
-        "number_transactions": 3,
-        "transactions_hashes": [
-            "a37da9e9f0389ea417925fc1a233f6e5126e472ea21ce4b6b790d38ec5ff7291",
-            "f50ee207dee0a4f6979ffc0c2626a928b0a5d3606d75b6ca9b0ed0b30482e1c4",
-            "5475237033f4f1fb5ca6767751078ab6ec72c768b2cd3a4cb7a8b9d8115cb90d"
-        ]
-    },
-    {
-        "timestamp": 1664764611486654100,
-        "last_hash": "fe805d59b09fbe2b8531f270ff7d7be4ce42be966a29e32846b1a420df6a1f6c",
-        "hash": "2ad82df7d485f508cb3655f3479e22b0ba33ea3c867a66bbf05093b90b74f14e",
-        "merkle_root": "cd760f7beaa28f799ece47e8377b1503e03fe30c600be449cb94971ebb46809b",
-        "number_transactions": 3,
-        "transactions_hashes": [
-            "afc49b855745cb6589afb0b0ef296fab80ac45fe9af91a4f79f0b792282360cd",
-            "efb8cd2a17ec77b5de9abdb8ca849e087987ac3440e039ec66716cdd54fb60fe",
-            "a73f5ae3ba97920cfb3dcfa4f1820b44114a4ffb7670f3236d1bb3438e768c15"
-        ]
-    },
-    {
-        "timestamp": 1664764678594889700,
-        "last_hash": "2ad82df7d485f508cb3655f3479e22b0ba33ea3c867a66bbf05093b90b74f14e",
-        "hash": "58e1013a32e5127360ef89ebd7d34fc8d1211ae513bb3548f53bddb25a57261c",
-        "merkle_root": "4a12970500bd5f4bb16dca7d4e3d344904030d3f59ba51253ac372fec5841ac3",
-        "number_transactions": 3,
-        "transactions_hashes": [
-            "0ea945dd7ff8be633da7d32df68d264b6a48d24d98f95032be4fee6ccc1aede0",
-            "924354ac53e78c413bcecf1c8047847a05c0a639ef3d318bda4ede926796d5fb",
-            "a27ec437e03c0e3daecb9f121a3da0bbd027f541682cbb5526a008c4b85bd65b"
-        ]
-    },
-    {
-        "timestamp": 1664764961531692153,
-        "last_hash": "58e1013a32e5127360ef89ebd7d34fc8d1211ae513bb3548f53bddb25a57261c",
-        "hash": "c5a175afabd76a9f5fb9800bdb5071ee2d712a5b674490027d982abdf6d9133c",
-        "merkle_root": "e9995d229cfbd7313b0ee89ac287ef9e451338e8865e7f2add10966a7e41d2d1",
-        "number_transactions": 3,
-        "transactions_hashes": [
-            "e6b14d6233e46f2adfa9b4301e122017b956c5e80259ff30e18b0b5fb8f10289",
-            "da1b6bd0dd9572dcc5b832c51cc0bf01f58270fedad08e25633f982350834888",
-            "257157969514d82b97ad862acacb4d2cb2affba695173bc01d566339fe2dbd7d"
-        ]
     }
 ]
