@@ -61,17 +61,18 @@ class MiningController:
         is_agreed_valid = MiningController.validate_new_block(blockchain, transactions_to_mine, mining_publisher,
                                                               mining_topic_path)
         if is_agreed_valid:
-            # TODO: Update backup
             logger.info("Updating local blockchain.")
             blockchain = DataIntegrator.read_json("db/blockchain.json")
             logger.info("Updating API blockchain.")
             MiningController.broadcast_chain_to_alter_nodes(mining_publisher,mining_topic_path)
-            # r = requests.post(url=Parameters.get_url_backup(), json=blockchain)
+            r = requests.put(url=Parameters.get_url_backup(), json=blockchain)
         else:
             # TODO: Get info from backup
-            # blockchain = requests.get(Parameters.get_url_backup())
+            blockchain = requests.get(Parameters.get_url_backup())
+            print(blockchain)
+            DataIntegrator.update_blockchain(blockchain)
             logger.info("Asking API for replacement")
-            pass
+
         return is_agreed_valid
 
     @staticmethod
