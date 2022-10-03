@@ -47,6 +47,8 @@ class MiningController:
             logger.info("This node is a validator.")
             is_agreed_valid = MiningController.validate_new_block(blockchain, transactions_to_mine, mining_publisher,
                                                                   mining_topic_path)
+        DataIntegrator.reset_mining()
+        logger.info("Mining is done.")
         return is_agreed_valid
 
     @staticmethod
@@ -100,7 +102,6 @@ class MiningController:
         else:
             logger.warning("Nodes agreed invalid block.")
             # TODO: Restart consensus algo.
-        DataIntegrator.reset_mining()
         return is_agreed_valid
 
     @staticmethod
