@@ -1,12 +1,11 @@
-from blockchain.Blockchain import Blockchain
 from integrators.DataIntegrator import DataIntegrator
 import random
 import time
 import json
 import logging
-from integrators.Parameters import Parameters
+from config.Parameters import Parameters
 
-#Initialize logger
+# Initialize logger
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s, %(name)s %(levelname)s : %(message)s')
@@ -19,12 +18,13 @@ stream_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
 logger.addHandler(stream_handler)
+
+
 class ConsensusController:
     @staticmethod
     def consensus_algorithm(api_publisher, api_topic_path):
         logger.info("Starting consensus algorithm.")
         ConsensusController.broadcast_number(api_publisher, api_topic_path)
-        # TODO: Death nodes
         nodes = DataIntegrator.read_json("db/nodes.json")
         timeout = time.time() + 60 * Parameters.get_time_out()  # 5 minutes from now
         while not ConsensusController.is_nodes_done(nodes):
@@ -42,7 +42,7 @@ class ConsensusController:
         logger.info(f"Verify winner {verify_winner}.")
         return verify_winner
 
-    #TODO: REFACTOR
+    # TODO: REFACTOR
 
     @staticmethod
     def notify_winner(api_publisher, api_topic_path, winner):
@@ -151,4 +151,3 @@ class ConsensusController:
         if sender != Parameters.get_node_id():
             nodes[sender] = winner
             DataIntegrator.write_json("db/winner.json", nodes)
-

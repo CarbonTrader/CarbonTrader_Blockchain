@@ -10,7 +10,7 @@ import logging
 from controllers.ConsensusController import ConsensusController
 from controllers.MiningController import MiningController
 from integrators.DataIntegrator import DataIntegrator
-from integrators.Parameters import Parameters
+from config.Parameters import Parameters
 
 #Initialize logger
 logger = logging.getLogger(__name__)
@@ -68,7 +68,9 @@ def handle_transaction_message(message):
         winner = begin_consensus_thread()
         if winner:
             begin_mining_thread(winner)
-        # TODO: what happens if there is no winner
+        # TODO: Restart if there is no winner
+        else:
+            print("There was no winner.")
 
 
 def begin_consensus_thread():
@@ -82,6 +84,7 @@ def begin_mining_thread(winner):
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future = executor.submit(MiningController.begin_mining,  api_publisher, api_topic_path, winner)
         result = future.result()
+        #TODO:Restart consensus algo
 
 
 def handle_message(message):
@@ -148,6 +151,7 @@ def callback(message):
 
 
 def main():
+    #TODO:Crear nuevo topico para las transacciones
     logger.info("Starting server.")
     node_messages_thread = threading.Thread(target=listener_transactions_messages)
     node_messages_thread.start()

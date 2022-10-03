@@ -1,7 +1,8 @@
 import json
 import logging
+import requests
 
-#Initialize logger
+# Initialize logger
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s, %(name)s %(levelname)s : %(message)s')
@@ -15,6 +16,7 @@ stream_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 logger.addHandler(stream_handler)
 
+
 class DataIntegrator:
     @staticmethod
     def read_json(filename):
@@ -25,6 +27,7 @@ class DataIntegrator:
         except:
             logger.error(f"There was a problem fetching {filename} the json file")
             return None
+
     @staticmethod
     def write_json(filename, data):
         try:
@@ -32,12 +35,14 @@ class DataIntegrator:
                 json.dump(data, fp, sort_keys=False, indent=4, separators=(',', ': '))
         except:
             logger.error(f"There was a problem writing the {filename} json file")
+
     @staticmethod
     def reset_consensus_nodes():
         nodes = DataIntegrator.read_json("db/nodes.json")
         for k, _ in nodes.items():
             nodes[k] = -1
         DataIntegrator.write_json("db/nodes.json", nodes)
+
     @staticmethod
     def reset_consensus_winners():
         nodes = DataIntegrator.read_json("db/winner.json")
@@ -54,7 +59,7 @@ class DataIntegrator:
 
     @staticmethod
     def update_blockchain(chain):
-        DataIntegrator.write_json("db/blockchain.json",chain)
+        DataIntegrator.write_json("db/blockchain.json", chain)
 
     @staticmethod
     def reset_all():
@@ -64,10 +69,12 @@ class DataIntegrator:
         DataIntegrator.write_json("db/transactions_to_mine.json", [])
         DataIntegrator.write_json("db/new_block.json", {})
         DataIntegrator.reset_validation()
+        DataIntegrator.fetch_blockchain_recovery()
+
     @staticmethod
     def reset_mining():
         DataIntegrator.write_json("db/new_block.json", {})
-        DataIntegrator.write_json("db/transactions_to_mine.json",[])
+        DataIntegrator.write_json("db/transactions_to_mine.json", [])
         DataIntegrator.reset_validation()
 
     @staticmethod
@@ -76,11 +83,20 @@ class DataIntegrator:
         trans_to_mine = transactions[:3]
         DataIntegrator.write_json("db/local_transactions.json", transactions[3:])
         DataIntegrator.write_json("db/transactions_to_mine.json", transactions[:3])
+
     @staticmethod
     def persist_validation(validation, node_id):
         nodes = DataIntegrator.read_json("db/validation.json")
         nodes[node_id] = validation
-        DataIntegrator.write_json("db/validation.json",nodes)
+        DataIntegrator.write_json("db/validation.json", nodes)
+
     @staticmethod
     def fetch_transactions_to_mine():
         return DataIntegrator.read_json('db/transactions_to_mine.json')
+
+    @staticmethod
+    def fetch_blockchain_recovery():
+        logger.info("Fetching copy of blockchain.")
+        data = DataIntegrator.read_json("config/config.json")
+        blockchain = requests.get(data["URL_BACKUP"])
+        DataIntegrator.update_blockchain(blockchain.json())

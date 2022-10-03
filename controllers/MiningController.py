@@ -3,7 +3,7 @@ import json
 from blockchain.Block import Block
 from blockchain.Blockchain import Blockchain
 from integrators.DataIntegrator import DataIntegrator
-from integrators.Parameters import Parameters
+from config.Parameters import Parameters
 import time
 import logging
 import requests
@@ -33,7 +33,6 @@ class MiningController:
             if not blockchain.chain:
                 logger.error('The blockchain is not initialize!')
                 raise ValueError('The blockchain is not initialize!')
-        # TODO: Check if thread is gone
         except ValueError as err:
             logger.error(str(err.args))
             exit()
@@ -67,10 +66,7 @@ class MiningController:
             MiningController.broadcast_chain_to_alter_nodes(mining_publisher,mining_topic_path)
             r = requests.put(url=Parameters.get_url_backup(), json=blockchain)
         else:
-            # TODO: Get info from backup
-            blockchain = requests.get(Parameters.get_url_backup())
-            print(blockchain)
-            DataIntegrator.update_blockchain(blockchain)
+            DataIntegrator.fetch_blockchain_recovery()
             logger.info("Asking API for replacement")
 
         return is_agreed_valid
