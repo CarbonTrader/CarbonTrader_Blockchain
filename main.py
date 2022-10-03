@@ -97,6 +97,8 @@ def handle_message(message):
         MiningController.handle_new_block_message(message)
     elif message_type == 'validation':
         MiningController.handle_validation_message(message)
+    elif message_type == 'recovery':
+        MiningController.handle_recovery_message(message)
 
 
 def create_subscription(subscriber, topic_sub_path, topic_path):

@@ -151,3 +151,4 @@ class ConsensusController:
         if sender != Parameters.get_node_id():
             nodes[sender] = winner
             DataIntegrator.write_json("db/winner.json", nodes)
+

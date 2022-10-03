@@ -8,7 +8,7 @@ import time
 import logging
 import requests
 
-#Initialize logger
+# Initialize logger
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s, %(name)s %(levelname)s : %(message)s')
@@ -21,6 +21,8 @@ stream_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
 logger.addHandler(stream_handler)
+
+
 class MiningController:
     @staticmethod
     def begin_mining(mining_publisher, mining_topic_path, winner):
@@ -39,10 +41,12 @@ class MiningController:
         is_agreed_valid = False
         if winner == Parameters.get_node_id():
             logger.info("This node is the miner.")
-            is_agreed_valid = MiningController.mine_new_block(mining_publisher, mining_topic_path, blockchain, transactions_to_mine)
+            is_agreed_valid = MiningController.mine_new_block(mining_publisher, mining_topic_path, blockchain,
+                                                              transactions_to_mine)
         else:
             logger.info("This node is a validator.")
-            is_agreed_valid = MiningController.validate_new_block(blockchain,transactions_to_mine, mining_publisher, mining_topic_path)
+            is_agreed_valid = MiningController.validate_new_block(blockchain, transactions_to_mine, mining_publisher,
+                                                                  mining_topic_path)
         return is_agreed_valid
 
     @staticmethod
@@ -52,20 +56,21 @@ class MiningController:
         new_block = blockchain.create_not_verify_block(transactions_hashes)
         logger.info("Broadcasting new block.")
         MiningController.broadcast_new_block(mining_publisher, mining_topic_path, new_block)
-        is_agreed_valid = MiningController.validate_new_block(blockchain, transactions_to_mine, mining_publisher, mining_topic_path)
+        is_agreed_valid = MiningController.validate_new_block(blockchain, transactions_to_mine, mining_publisher,
+                                                              mining_topic_path)
         if is_agreed_valid:
-            #TODO: Update backup
+            # TODO: Update backup
             logger.info("Updating local blockchain.")
             blockchain = DataIntegrator.read_json("db/blockchain.json")
             logger.info("Updating API blockchain.")
-            #r = requests.post(url=Parameters.get_url_backup(), json=blockchain)
+            MiningController.broadcast_chain_to_alter_nodes(mining_publisher,mining_topic_path)
+            # r = requests.post(url=Parameters.get_url_backup(), json=blockchain)
         else:
-            #TODO: Get info from backup
-            #blockchain = requests.get(Parameters.get_url_backup())
+            # TODO: Get info from backup
+            # blockchain = requests.get(Parameters.get_url_backup())
             logger.info("Asking API for replacement")
             pass
         return is_agreed_valid
-
 
     @staticmethod
     def validate_new_block(blockchain, transactions_to_mine, mining_publisher, mining_topic_path):
@@ -78,7 +83,7 @@ class MiningController:
             new_block_to_verify = DataIntegrator.read_json("db/new_block.json")
             if time.time() > timeout:
                 break
-                #TODO: Restart
+                # TODO: Restart
         if Block.is_valid_block(new_block_to_verify, blockchain.chain[-1], transactions_to_mine, transactions_hashes):
             logger.info("New block determined to be valid")
             is_valid = True
@@ -90,11 +95,11 @@ class MiningController:
         logger.info("Receiving validations from nodes.")
         is_agreed_valid = MiningController.fetch_nodes_validation()
         if is_agreed_valid:
-            MiningController.update_blockchain(blockchain,new_block_to_verify, is_valid)
+            MiningController.update_blockchain(blockchain, new_block_to_verify, is_valid)
             logger.info("Nodes agreed valid block.")
         else:
             logger.warning("Nodes agreed invalid block.")
-            #TODO: Restart consensus algo.
+            # TODO: Restart consensus algo.
         DataIntegrator.reset_mining()
         return is_agreed_valid
 
@@ -106,8 +111,33 @@ class MiningController:
             logger.info("Blockchain updated.")
         else:
             logger.warning("Blockchain alter, must receive new.")
-            #TODO: Ask for back up
+            # TODO: Ask for back up
 
+    @staticmethod
+    def broadcast_chain_to_alter_nodes(mining_publisher, mining_topic_path):
+        nodes = DataIntegrator.read_json("db/validation.json")
+        alter_nodes = MiningController.get_alter_nodes(nodes)
+        blockchain = DataIntegrator.read_json("db/blockchain.json")
+        data = {
+            'type': 'recovery',
+            'sender': Parameters.get_node_id(),
+            'alter_nodes': alter_nodes,
+            'blockchain': blockchain
+        }
+        message_to_send = json.dumps(data, ensure_ascii=False).encode('utf8')
+        future1 = mining_publisher.publish(mining_topic_path, message_to_send)
+        future1.result()
+
+
+    @staticmethod
+    def get_alter_nodes(nodes):
+        alter_nodes = []
+        print(nodes)
+        for k, v in nodes.items():
+            if not v:
+                alter_nodes.append(k)
+        print(alter_nodes)
+        return alter_nodes
 
     @staticmethod
     def fetch_nodes_validation():
@@ -124,12 +154,13 @@ class MiningController:
             return True
         else:
             return False
+
     @staticmethod
     def validate_fifty_one_acceptance():
         logger.info("Validating 51% acceptance.")
         nodes = DataIntegrator.read_json("db/validation.json")
         alive_nodes = [v for _, v in nodes.items() if v != '']
-        fifty_one_percent = len(alive_nodes)*0.51
+        fifty_one_percent = len(alive_nodes) * 0.51
         if alive_nodes.count(True) >= fifty_one_percent:
             return True
         else:
@@ -158,7 +189,6 @@ class MiningController:
         if sender != Parameters.get_node_id():
             DataIntegrator.persist_validation(validation, sender)
 
-
     @staticmethod
     def broadcast_validation(mining_publisher, mining_topic_path, validation):
         data = {
@@ -180,3 +210,11 @@ class MiningController:
         message_to_send = json.dumps(data, ensure_ascii=False).encode('utf8')
         future1 = mining_publisher.publish(mining_topic_path, message_to_send)
         future1.result()
+
+    @staticmethod
+    def handle_recovery_message(message):
+        alter_nodes = message['alter_nodes']
+        blockchain = message['blockchain']
+
+        logger.info(alter_nodes)
+        logger.info(blockchain)
