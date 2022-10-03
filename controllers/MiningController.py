@@ -119,25 +119,24 @@ class MiningController:
         nodes = DataIntegrator.read_json("db/validation.json")
         alter_nodes = MiningController.get_alter_nodes(nodes)
         blockchain = DataIntegrator.read_json("db/blockchain.json")
-        data = {
-            'type': 'recovery',
-            'sender': Parameters.get_node_id(),
-            'alter_nodes': alter_nodes,
-            'blockchain': blockchain
-        }
-        message_to_send = json.dumps(data, ensure_ascii=False).encode('utf8')
-        future1 = mining_publisher.publish(mining_topic_path, message_to_send)
-        future1.result()
+        if alter_nodes:
+            data = {
+                'type': 'recovery',
+                'sender': Parameters.get_node_id(),
+                'alter_nodes': alter_nodes,
+                'blockchain': blockchain
+            }
+            message_to_send = json.dumps(data, ensure_ascii=False).encode('utf8')
+            future1 = mining_publisher.publish(mining_topic_path, message_to_send)
+            future1.result()
 
 
     @staticmethod
     def get_alter_nodes(nodes):
         alter_nodes = []
-        print(nodes)
         for k, v in nodes.items():
             if not v and v != "":
                 alter_nodes.append(k)
-        print(alter_nodes)
         return alter_nodes
 
     @staticmethod
@@ -217,5 +216,7 @@ class MiningController:
         alter_nodes = message['alter_nodes']
         blockchain = message['blockchain']
 
-        logger.info(alter_nodes)
-        logger.info(blockchain)
+        if Parameters.get_node_id() in alter_nodes:
+            logger.info("Replacing blockchain.")
+            DataIntegrator.update_blockchain(blockchain)
+
