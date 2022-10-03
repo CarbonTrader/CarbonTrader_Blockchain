@@ -135,7 +135,7 @@ class MiningController:
         alter_nodes = []
         print(nodes)
         for k, v in nodes.items():
-            if not v:
+            if not v and v != "":
                 alter_nodes.append(k)
         print(alter_nodes)
         return alter_nodes
