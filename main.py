@@ -68,7 +68,8 @@ def handle_transaction_message(message):
     transactions.append(transaction)
     DataIntegrator.write_json("db/local_transactions.json", transactions)
     if len(transactions) >= Parameters.get_max_transactions_per_block():
-        DataIntegrator.update_transactions_to_mine()
+        DataIntegrator.update_transactions_to_mine(
+            Parameters.get_max_transactions_per_block())
         winner = begin_consensus_thread()
         if winner:
             begin_mining_thread(winner)
@@ -165,8 +166,6 @@ def main():
     # TODO:Crear nuevo topico para las transacciones
     logger.info("Starting server.")
     listener_transactions_messages()
-    #node_messages_thread = threading.Thread(target=listener_transactions_messages)
-    # node_messages_thread.start()
 
 
 if __name__ == "__main__":
