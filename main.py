@@ -12,10 +12,11 @@ from controllers.MiningController import MiningController
 from integrators.DataIntegrator import DataIntegrator
 from config.Parameters import Parameters
 
-#Initialize logger
+# Initialize logger
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s, %(name)s %(levelname)s : %(message)s')
+formatter = logging.Formatter(
+    '%(asctime)s, %(name)s %(levelname)s : %(message)s')
 file_handler = logging.FileHandler('db/blockchain.log')
 file_handler.setLevel(logging.DEBUG)
 file_handler.setFormatter(formatter)
@@ -47,13 +48,16 @@ api_subscriber = pubsub_v1.SubscriberClient()
 api_topic_subscription_path = api_subscriber.subscription_path(
     settings.project_id, settings.api_topic_subscription_id)
 api_publisher = pubsub_v1.PublisherClient()
-api_topic_path = api_publisher.topic_path(settings.project_id, settings.api_topic_id)
+api_topic_path = api_publisher.topic_path(
+    settings.project_id, settings.api_topic_id)
 
-#Mining init
+# Mining init
 mining_subscriber = pubsub_v1.SubscriberClient()
-mining_sub_path = mining_subscriber.subscription_path(settings.project_id, settings.mining_topic_sub_id)
+mining_sub_path = mining_subscriber.subscription_path(
+    settings.project_id, settings.mining_topic_sub_id)
 mining_publisher = pubsub_v1.PublisherClient()
-mining_topic_path = mining_publisher.topic_path(settings.project_id, settings.mining_topic_id)
+mining_topic_path = mining_publisher.topic_path(
+    settings.project_id, settings.mining_topic_id)
 
 
 # TODO:Think of what happens when there are enogh transactions for 2 blocks
@@ -75,16 +79,18 @@ def handle_transaction_message(message):
 
 def begin_consensus_thread():
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        future = executor.submit(ConsensusController.consensus_algorithm, api_publisher, api_topic_path)
+        future = executor.submit(
+            ConsensusController.consensus_algorithm, api_publisher, api_topic_path)
         winner = future.result()
         return winner
 
 
 def begin_mining_thread(winner):
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        future = executor.submit(MiningController.begin_mining,  api_publisher, api_topic_path, winner)
+        future = executor.submit(
+            MiningController.begin_mining,  api_publisher, api_topic_path, winner)
         result = future.result()
-        #TODO:Restart consensus algo
+        # TODO:Restart consensus algo
 
 
 def handle_message(message):
@@ -110,6 +116,7 @@ def create_subscription(subscriber, topic_sub_path, topic_path):
                  "topic": topic_path}
     )
 
+
 def listener_transactions_messages():
     with api_subscriber, mining_subscriber:
         subscriptions = []
@@ -117,13 +124,17 @@ def listener_transactions_messages():
             subscriptions.append(sub.name)
 
         if api_topic_subscription_path in subscriptions:
-            api_subscriber.delete_subscription(request={"subscription": api_topic_subscription_path})
+            api_subscriber.delete_subscription(
+                request={"subscription": api_topic_subscription_path})
 
         if mining_sub_path in subscriptions:
-            mining_subscriber.delete_subscription(request={"subscription": mining_sub_path})
+            mining_subscriber.delete_subscription(
+                request={"subscription": mining_sub_path})
 
-        create_subscription(api_subscriber,api_topic_subscription_path, api_topic_path)
-        create_subscription(mining_subscriber,mining_sub_path, mining_topic_path)
+        create_subscription(
+            api_subscriber, api_topic_subscription_path, api_topic_path)
+        create_subscription(mining_subscriber,
+                            mining_sub_path, mining_topic_path)
 
         logger.info('Waiting for transactions.')
         future = api_subscriber.subscribe(
@@ -140,8 +151,8 @@ def listener_transactions_messages():
             future2.cancel()
             api_subscriber.delete_subscription(
                 request={"subscription": api_topic_subscription_path})
-            mining_subscriber.delete_subscription( request={"subscription": mining_sub_path})
-
+            mining_subscriber.delete_subscription(
+                request={"subscription": mining_sub_path})
 
 
 def callback(message):
@@ -151,10 +162,11 @@ def callback(message):
 
 
 def main():
-    #TODO:Crear nuevo topico para las transacciones
+    # TODO:Crear nuevo topico para las transacciones
     logger.info("Starting server.")
-    node_messages_thread = threading.Thread(target=listener_transactions_messages)
-    node_messages_thread.start()
+    listener_transactions_messages()
+    #node_messages_thread = threading.Thread(target=listener_transactions_messages)
+    # node_messages_thread.start()
 
 
 if __name__ == "__main__":
