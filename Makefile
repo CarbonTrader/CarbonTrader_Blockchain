@@ -13,5 +13,14 @@ $(VENV_NAME)/bin/activate: requirements.txt
 	${PYTHON} -m pip install -r requirements.txt
 	sudo touch $(VENV_NAME)/bin/activate
 
+config-linux: 
+	sudo apt update
+	sudo  apt upgrade
+	sudo apt install python3
+	sudo apt install python3.10-venv
+	sudo update-alternatives --install /usr/bin/python python usr/bin/python3 1
+	sudo apt install python3-pip
+
+
 serve: prepare_venv
 	CREDENTIALS_PATH="db/service-account-info.json" ${PYTHON} -m  main
