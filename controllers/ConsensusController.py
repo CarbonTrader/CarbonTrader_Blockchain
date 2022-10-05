@@ -32,15 +32,11 @@ class ConsensusController:
     def consensus_algorithm(api_publisher, api_topic_path):
         global NODES
         ConsensusController.init_consensus_objects()
-        print(NODES)
-        print(WINNER)
         logger.info("Starting consensus algorithm.")
         ConsensusController.broadcast_number(api_publisher, api_topic_path)
-        print(NODES)
         timeout = time.time() + 60 * Parameters.get_time_out()  # 5 minutes from now
         while not ConsensusController.is_nodes_done():
             time.sleep(1)
-            print(NODES)
             logger.info("Waiting for random number from nodes.")
             if time.time() > timeout:
                 break
@@ -89,11 +85,10 @@ class ConsensusController:
     @staticmethod
     def establish_winner():
         global WINNER
-        logger.info("Establishing with the global winner nodes.")
+        logger.info("Establishing the global winner nodes.")
         timeout = time.time() + 60 * Parameters.get_time_out()  # 5 minutes from now
         while not ConsensusController.is_winner_done():
             time.sleep(1)
-            print(WINNER)
             logger.info("Waiting for response from nodes about winner.")
             if time.time() > timeout:
                 break
