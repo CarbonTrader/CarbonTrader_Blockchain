@@ -1,5 +1,4 @@
 import json
-from symbol import parameters
 
 from blockchain.Block import Block
 from blockchain.Blockchain import Blockchain
