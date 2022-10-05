@@ -2,6 +2,7 @@ import json
 
 from blockchain.Block import Block
 from blockchain.Blockchain import Blockchain
+from controllers.ConsensusController import WINNER
 from integrators.DataIntegrator import DataIntegrator
 from config.Parameters import Parameters
 import time
@@ -23,23 +24,14 @@ stream_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 logger.addHandler(stream_handler)
 
-VALIDATION = {
-    "Node1": "",
-    "Node2": "",
-    "Node3": "",
-    "Node4": "",
-    "Node5": "",
-    "Node6": "",
-    "Node7": "",
-    "Node8": "",
-    "Node9": "",
-    "Node10": ""
-}
+VALIDATION = {}
 
 
 class MiningController:
     @staticmethod
     def begin_mining(mining_publisher, mining_topic_path, winner):
+        global VALIDATION
+        VALIDATION = DataIntegrator.reset_validation()
         logger.info("Starting mining.")
         blockchain = Blockchain()
         blockchain.upload_blockchain()
@@ -133,8 +125,7 @@ class MiningController:
 
     @staticmethod
     def broadcast_chain_to_alter_nodes(mining_publisher, mining_topic_path):
-        nodes = DataIntegrator.read_json("db/validation.json")
-        alter_nodes = MiningController.get_alter_nodes(nodes)
+        alter_nodes = MiningController.get_alter_nodes()
         blockchain = DataIntegrator.read_json("db/blockchain.json")
         if alter_nodes:
             data = {
@@ -150,9 +141,9 @@ class MiningController:
             future1.result()
 
     @staticmethod
-    def get_alter_nodes(nodes):
+    def get_alter_nodes():
         alter_nodes = []
-        for k, v in nodes.items():
+        for k, v in WINNER.items():
             if not v and v != "":
                 alter_nodes.append(k)
         return alter_nodes
@@ -162,7 +153,6 @@ class MiningController:
         timeout = time.time() + 60 * Parameters.get_time_out()  # 5 minutes from now
         while not MiningController.is_validation_done():
             time.sleep(1)
-            print(VALIDATION)
             logger.info("Waiting for validation results from nodes.")
             if time.time() > timeout:
                 break
