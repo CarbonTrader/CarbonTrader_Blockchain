@@ -143,7 +143,7 @@ class MiningController:
     @staticmethod
     def get_alter_nodes():
         alter_nodes = []
-        for k, v in WINNER.items():
+        for k, v in VALIDATION.items():
             if not v and v != "":
                 alter_nodes.append(k)
         return alter_nodes
