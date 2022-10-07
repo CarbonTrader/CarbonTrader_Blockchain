@@ -15,7 +15,7 @@ $(VENV_NAME)/bin/activate: requirements.txt
 
 config-linux: 
 	sudo apt update
-	sudo  apt upgrade
+	sudo apt upgrade
 	sudo apt install python3
 	sudo apt install python3.10-venv
 	sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 1

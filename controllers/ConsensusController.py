@@ -34,14 +34,14 @@ class ConsensusController:
         ConsensusController.init_consensus_objects()
         logger.info("Starting consensus algorithm.")
         ConsensusController.broadcast_number(api_publisher, api_topic_path)
-        timeout = time.time() + 60 * Parameters.get_time_out()  # 5 minutes from now
+        timeout = time.time() + 60 * Parameters.get_time_out()
         while not ConsensusController.is_nodes_done():
             time.sleep(1)
             logger.info("Waiting for random number from nodes.")
             if time.time() > timeout:
                 break
+        ConsensusController.update_log_death_nodes_random_nunmber()
         winner = ConsensusController.get_consensus_winner()
-        print(WINNER)
         logger.info("Unverified winner {}.".format(winner))
         ConsensusController.notify_winner(
             api_publisher, api_topic_path, winner)
@@ -86,12 +86,13 @@ class ConsensusController:
     def establish_winner():
         global WINNER
         logger.info("Establishing the global winner nodes.")
-        timeout = time.time() + 60 * Parameters.get_time_out()  # 5 minutes from now
+        timeout = time.time() + 60 * Parameters.get_time_out()
         while not ConsensusController.is_winner_done():
             time.sleep(1)
             logger.info("Waiting for response from nodes about winner.")
             if time.time() > timeout:
                 break
+        ConsensusController.update_log_death_nodes_winner()
         if ConsensusController.verify_consensus_winner():
             return WINNER[Parameters.get_node_id()]
         return None
@@ -143,6 +144,19 @@ class ConsensusController:
         global NODES, WINNER
         NODES = DataIntegrator.reset_consensus_nodes()
         WINNER = DataIntegrator.reset_consensus_winners()
+
+    @staticmethod
+    def update_log_death_nodes_random_nunmber():
+        for k, v in NODES.items():
+            if v == -1:
+                logger.warning(
+                    f"There was no random number response from node {k}.")
+
+    @staticmethod
+    def update_log_death_nodes_winner():
+        for k, v in WINNER.items():
+            if v == "":
+                logger.warning(f"There was no winner response from node {k}.")
 
     @staticmethod
     def handle_consensus_message(message):

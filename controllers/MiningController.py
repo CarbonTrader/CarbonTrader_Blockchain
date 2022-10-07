@@ -2,7 +2,7 @@ import json
 
 from blockchain.Block import Block
 from blockchain.Blockchain import Blockchain
-from controllers.ConsensusController import WINNER
+from controllers.ConsensusController import WINNER, ConsensusController
 from integrators.DataIntegrator import DataIntegrator
 from config.Parameters import Parameters
 import time
@@ -52,8 +52,6 @@ class MiningController:
             logger.info("This node is a validator.")
             is_agreed_valid = MiningController.validate_new_block(blockchain, transactions_to_mine, mining_publisher,
                                                                   mining_topic_path)
-        DataIntegrator.reset_mining()
-        logger.info("Mining is done.")
         return is_agreed_valid
 
     @staticmethod
@@ -111,7 +109,6 @@ class MiningController:
             logger.info("Nodes agreed valid block.")
         else:
             logger.warning("Nodes agreed invalid block.")
-            # TODO: Restart consensus algo.
         return is_agreed_valid
 
     @staticmethod
@@ -156,6 +153,7 @@ class MiningController:
             logger.info("Waiting for validation results from nodes.")
             if time.time() > timeout:
                 break
+        MiningController.update_log_death_nodes_block_validation()
         is_valid = MiningController.validate_fifty_one_acceptance()
         if is_valid:
             return True
@@ -178,6 +176,13 @@ class MiningController:
             if v == "":
                 return False
         return True
+
+    @staticmethod
+    def update_log_death_nodes_block_validation():
+        for k, v in VALIDATION.items():
+            if v == "":
+                logger.warning(
+                    f"There was no validation response from node {k}.")
 
     @staticmethod
     def handle_new_block_message(message):

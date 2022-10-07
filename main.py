@@ -60,7 +60,6 @@ mining_topic_path = mining_publisher.topic_path(
     settings.project_id, settings.mining_topic_id)
 
 
-# TODO:Think of what happens when there are enogh transactions for 2 blocks
 def handle_transaction_message(message):
     transaction = message['transactions']
     logger.info(f'Transaction received {transaction}')
@@ -70,12 +69,16 @@ def handle_transaction_message(message):
     if len(transactions) >= Parameters.get_max_transactions_per_block():
         DataIntegrator.update_transactions_to_mine(
             Parameters.get_max_transactions_per_block())
+        start_consensus_process()
+
+
+def start_consensus_process():
+    winner = begin_consensus_thread()
+    while not winner:
         winner = begin_consensus_thread()
-        if winner:
-            begin_mining_thread(winner)
-        # TODO: Restart if there is no winner
-        else:
-            print("There was no winner.")
+        logger.warning("There was no agreed winner.")
+        logger.warnig("Restarting consensus algorithm.")
+    begin_mining_thread(winner)
 
 
 def begin_consensus_thread():
@@ -90,8 +93,11 @@ def begin_mining_thread(winner):
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future = executor.submit(
             MiningController.begin_mining,  api_publisher, api_topic_path, winner)
-        result = future.result()
-        # TODO:Restart consensus algo
+        valid_mining = future.result()
+        if valid_mining:
+            logger.info("Mining is done.")
+        else:
+            start_consensus_process()
 
 
 def handle_message(message):
@@ -163,7 +169,6 @@ def callback(message):
 
 
 def main():
-    # TODO:Crear nuevo topico para las transacciones
     logger.info("Starting server.")
     listener_transactions_messages()
 
