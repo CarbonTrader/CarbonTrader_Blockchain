@@ -24,3 +24,7 @@ config-linux:
 
 serve: prepare_venv
 	CREDENTIALS_PATH="db/service-account-info.json" ${PYTHON} -m  main
+
+test: prepare_venv
+	python -m pytest test/blockchain-unit-test.py -vv
+
