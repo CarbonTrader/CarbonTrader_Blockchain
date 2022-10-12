@@ -26,5 +26,5 @@ serve: prepare_venv
 	CREDENTIALS_PATH="db/service-account-info.json" ${PYTHON} -m  main
 
 test: prepare_venv
-	python -m pytest test/blockchainUnitTest.py -v
+	${PYTHON} -m pytest test/blockchainUnitTest.py -v
 
