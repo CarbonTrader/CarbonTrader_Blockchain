@@ -102,7 +102,7 @@ class Block:
             print('The block hash is not valid.')
             return False
 
-        if last_block.get("hash") != reconstructed_last_hash:
+        if last_block.hash != reconstructed_last_hash:
             print('The last block hash is not valid.')
             return False
 
