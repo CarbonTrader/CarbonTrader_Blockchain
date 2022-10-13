@@ -24,3 +24,6 @@ config-linux:
 
 serve: prepare_venv
 	CREDENTIALS_PATH="db/service-account-info.json" ${PYTHON} -m  main
+
+api: prepare_venv
+	${PYTHON} -m  uvicorn app.main:app --reload

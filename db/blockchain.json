@@ -30,5 +30,17 @@
             "cdd1fc8c847174cdafe601b4f2a158e654d7b0b1703aa8c18ac8bcd0b73e30c6",
             "448c46618733af81f56e1616d8c397cd1ac928037471f7a0c0154c32752524b0"
         ]
+    },
+    {
+        "timestamp": 1665681799173266100,
+        "last_hash": "98f6361495447ecab60bd8566c3a0d4fdc058ee1ae484fd561020d18cb4d6731",
+        "hash": "d8cabc0e3554a9b8bd1a957a781836e0a659c24978645fc3eb748cefbdc4b8ea",
+        "merkle_root": "b1566e3409a3cd7f184c2c6ed746581c1b48dda4577fe918e316c9fd4a701738",
+        "number_transactions": 3,
+        "transactions_hashes": [
+            "a5b86973dc402dc6702e09796b75f6ca46826790d836c77e3a217cbc7cceb741",
+            "b51b115c57174fcc93a0d72b3458e0cf3bb71baf35509c5a3d31bc05982dccfe",
+            "4e1428931fe21cdcd7d8e1669b6c26a4d0aab3b3114a968fb146f1ac65505ee1"
+        ]
     }
 ]

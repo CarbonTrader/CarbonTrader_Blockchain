@@ -79,7 +79,7 @@ def start_consensus_process():
     while not winner:
         winner = begin_consensus_thread()
         logger.warning("There was no agreed winner.")
-        logger.warnig("Restarting consensus algorithm.")
+        logger.warning("Restarting consensus algorithm.")
     begin_mining_thread(winner)
 
 
@@ -172,16 +172,13 @@ def callback(message):
 
 def test():
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        future = executor.submit(
-            AuditController.audit_full_blockchain())
+        future = executor.submit(AuditController.audit_full_blockchain())  # type: ignore
 
 
 def main():
     logger.info("Starting server.")
     test()
     listener_transactions_messages()
-
-
 
 if __name__ == "__main__":
     logger.info("Resetting mining values.")
