@@ -2,7 +2,6 @@ import json
 
 from blockchain.Block import Block
 from blockchain.Blockchain import Blockchain
-from controllers.ConsensusController import WINNER, ConsensusController
 from integrators.DataIntegrator import DataIntegrator
 from config.Parameters import Parameters
 import time

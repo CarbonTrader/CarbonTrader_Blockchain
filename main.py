@@ -7,6 +7,8 @@ from concurrent import futures
 from google.cloud import pubsub_v1
 from pydantic import BaseSettings
 import logging
+
+from controllers.AuditController import AuditController
 from controllers.ConsensusController import ConsensusController
 from controllers.MiningController import MiningController
 from integrators.DataIntegrator import DataIntegrator
@@ -92,7 +94,7 @@ def begin_consensus_thread():
 def begin_mining_thread(winner):
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future = executor.submit(
-            MiningController.begin_mining,  api_publisher, api_topic_path, winner)
+            MiningController.begin_mining, api_publisher, api_topic_path, winner)
         valid_mining = future.result()
         if valid_mining:
             logger.info("Mining is done.")
@@ -168,9 +170,17 @@ def callback(message):
     handle_message(data)
 
 
+def test():
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future = executor.submit(
+            AuditController.audit_full_blockchain())
+
+
 def main():
     logger.info("Starting server.")
+    test()
     listener_transactions_messages()
+
 
 
 if __name__ == "__main__":
