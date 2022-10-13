@@ -45,7 +45,6 @@ settings = Settings()
 # GCP Auth
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = settings.CREDENTIALS_PATH
 
-# Creando el suscriptor
 api_subscriber = pubsub_v1.SubscriberClient()
 api_topic_subscription_path = api_subscriber.subscription_path(
     settings.project_id, settings.api_topic_subscription_id)
@@ -117,7 +116,8 @@ def handle_message(message):
         MiningController.handle_validation_message(message)
     elif message_type == 'recovery':
         MiningController.handle_recovery_message(message)
-
+    elif message_type == "audit":
+        AuditController.audit_full_blockchain(message)
 
 def create_subscription(subscriber, topic_sub_path, topic_path):
     subscriber.create_subscription(
@@ -170,14 +170,9 @@ def callback(message):
     handle_message(data)
 
 
-def test():
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        future = executor.submit(AuditController.audit_full_blockchain())  # type: ignore
-
 
 def main():
     logger.info("Starting server.")
-    test()
     listener_transactions_messages()
 
 if __name__ == "__main__":
