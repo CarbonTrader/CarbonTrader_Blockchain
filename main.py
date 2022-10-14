@@ -117,7 +117,9 @@ def handle_message(message):
     elif message_type == 'recovery':
         MiningController.handle_recovery_message(message)
     elif message_type == "audit":
-        AuditController.audit_full_blockchain(message)
+        AuditController.audit_full_blockchain(
+            api_publisher, api_topic_path, message)
+
 
 def create_subscription(subscriber, topic_sub_path, topic_path):
     subscriber.create_subscription(
@@ -170,10 +172,10 @@ def callback(message):
     handle_message(data)
 
 
-
 def main():
     logger.info("Starting server.")
     listener_transactions_messages()
+
 
 if __name__ == "__main__":
     logger.info("Resetting mining values.")
