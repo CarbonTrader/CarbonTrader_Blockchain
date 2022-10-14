@@ -1,3 +1,4 @@
+from fcntl import F_SEAL_SEAL
 from blockchain.Block import Block
 from blockchain.Blockchain import Blockchain
 import time
@@ -5,15 +6,15 @@ import json
 from blockchain.Merkle import Merkle
 from config.Parameters import Parameters
 import random
+project_id = 'flash-ward-360216'
 
 
 class AuditController:
     @staticmethod
-    def audit_full_blockchain(api_publisher, api_topic_path, message):
-        time.sleep(5)
+    def audit_full_blockchain(api_publisher, api_topic_path, api_subscriber, message):
         response = {
             "type": "audit_response",
-            "sende_id": Parameters.get_node_id(),
+            "sender_id": Parameters.get_node_id(),
             "test_results": {
                 "test_audit": None,
                 "test_signatures": None,
@@ -23,8 +24,6 @@ class AuditController:
         parameters = message["parameters"]
         blockchain = Blockchain()
         blockchain.upload_blockchain()
-        AuditController.return_response(
-            api_publisher, api_topic_path, response)
 
         if parameters.get("audit_type") == 2:
             response["test_results"]["test_audit"] = AuditController.deep_block_hash_test(
@@ -34,13 +33,13 @@ class AuditController:
                 blockchain.chain)
 
         if parameters.get("merkle_search"):
-            response["test_results"]["merkle_search"] = AuditController.validate_transaction_in_block(
+            response["test_results"]["test_transactions_in_block"] = AuditController.validate_transaction_in_block(
                 blockchain.chain, parameters.get("merkle_search"))
-        print(response)
+        AuditController.return_response(
+            api_publisher, api_topic_path, response)
 
     @staticmethod
     def deep_block_hash_test(chain) -> bool:
-        tainted_block = []
         for i in range(len(chain)-1, 0, -1):
             if not Block.is_valid_audit_block(chain[i], chain[i-1]):
                 return False

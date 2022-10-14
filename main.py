@@ -118,7 +118,7 @@ def handle_message(message):
         MiningController.handle_recovery_message(message)
     elif message_type == "audit":
         AuditController.audit_full_blockchain(
-            api_publisher, api_topic_path, message)
+            api_publisher, api_topic_path, api_subscriber, message)
 
 
 def create_subscription(subscriber, topic_sub_path, topic_path):
