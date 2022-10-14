@@ -1,16 +1,1 @@
-[
-    {
-        "id": "id89",
-        "timestamp": 1665782328468835320,
-        "recipient_address": "address",
-        "sender_address": "2bef73dc-f26b-4bb9-a0bf-e943278ef9bf",
-        "carbon_trader_serial": "serial",
-        "transaction_type": "type",
-        "public_key": "-----BEGIN PUBLIC KEY-----\nMFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAE6t4ZW6nslpJOegcgCSvs3NhsosqRwmMy\nBmYFuSrvKouT5EkRqnsbjuRjlkW3v3+VbImfwCBW/ntJbt6MnzPytw==\n-----END PUBLIC KEY-----\n",
-        "hash": "0d17252057df2b67a83dd8b96dd6d542fa71ba032734b7850ff5fc766092f6da",
-        "signature": [
-            17765031015172962184394451631965626382034332357604593671126600807535597149577,
-            53335697082250815979757039483958752753948878618736159194685385300979575603596
-        ]
-    }
-]
+[]

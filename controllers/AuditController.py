@@ -1,3 +1,4 @@
+from distutils import log
 from fcntl import F_SEAL_SEAL
 from blockchain.Block import Block
 from blockchain.Blockchain import Blockchain
@@ -6,7 +7,25 @@ import json
 from blockchain.Merkle import Merkle
 from config.Parameters import Parameters
 import random
+import logging
+
 project_id = 'flash-ward-360216'
+
+
+# Initialize logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter(
+    '%(asctime)s, %(name)s %(levelname)s : %(message)s')
+file_handler = logging.FileHandler('db/audit.log')
+file_handler.setLevel(logging.DEBUG)
+file_handler.setFormatter(formatter)
+
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+logger.addHandler(stream_handler)
 
 
 class AuditController:
@@ -37,6 +56,7 @@ class AuditController:
                 blockchain.chain, parameters.get("merkle_search"))
         AuditController.return_response(
             api_publisher, api_topic_path, response)
+        logger.info("Audit results." + str(response))
 
     @staticmethod
     def deep_block_hash_test(chain) -> bool:
