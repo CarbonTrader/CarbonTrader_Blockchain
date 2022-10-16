@@ -7,6 +7,7 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric.utils import (
 encode_dss_signature, decode_dss_signature
 )
+
 from cryptography.hazmat.primitives.asymmetric import ec
 
 
@@ -51,7 +52,7 @@ class Wallet:
         return decode_dss_signature(signature)
 
     @staticmethod
-    def verify(ser_public_key, transaction, signature):
+    def verify(ser_public_key, transaction, signature) -> bool:
         """
         Verify a signature based on the orginal public key and data.
         """
