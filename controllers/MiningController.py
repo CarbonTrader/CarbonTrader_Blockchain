@@ -90,7 +90,6 @@ class MiningController:
             new_block_to_verify = DataIntegrator.read_json("db/new_block.json")
             if time.time() > timeout:
                 break
-                # TODO: Restart
         if Block.is_valid_block(new_block_to_verify, blockchain.chain[-1], transactions_to_mine, transactions_hashes):
             logger.info("New block determined to be valid")
             is_valid = True
