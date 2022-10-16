@@ -27,4 +27,3 @@ serve: prepare_venv
 
 test: prepare_venv
 	${PYTHON} -m pytest test/blockchainUnitTest.py -v
-

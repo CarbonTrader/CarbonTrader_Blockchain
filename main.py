@@ -7,6 +7,8 @@ from concurrent import futures
 from google.cloud import pubsub_v1
 from pydantic import BaseSettings
 import logging
+
+from controllers.AuditController import AuditController
 from controllers.ConsensusController import ConsensusController
 from controllers.MiningController import MiningController
 from integrators.DataIntegrator import DataIntegrator
@@ -43,7 +45,6 @@ settings = Settings()
 # GCP Auth
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = settings.CREDENTIALS_PATH
 
-# Creando el suscriptor
 api_subscriber = pubsub_v1.SubscriberClient()
 api_topic_subscription_path = api_subscriber.subscription_path(
     settings.project_id, settings.api_topic_subscription_id)
@@ -77,7 +78,7 @@ def start_consensus_process():
     while not winner:
         winner = begin_consensus_thread()
         logger.warning("There was no agreed winner.")
-        logger.warnig("Restarting consensus algorithm.")
+        logger.warning("Restarting consensus algorithm.")
     begin_mining_thread(winner)
 
 
@@ -92,7 +93,7 @@ def begin_consensus_thread():
 def begin_mining_thread(winner):
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future = executor.submit(
-            MiningController.begin_mining,  api_publisher, api_topic_path, winner)
+            MiningController.begin_mining, api_publisher, api_topic_path, winner)
         valid_mining = future.result()
         if valid_mining:
             logger.info("Mining is done.")
@@ -115,6 +116,9 @@ def handle_message(message):
         MiningController.handle_validation_message(message)
     elif message_type == 'recovery':
         MiningController.handle_recovery_message(message)
+    elif message_type == "audit":
+        AuditController.audit_full_blockchain(
+            api_publisher, api_topic_path, api_subscriber, message)
 
 
 def create_subscription(subscriber, topic_sub_path, topic_path):

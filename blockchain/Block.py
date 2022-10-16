@@ -1,5 +1,6 @@
 import json
 import time
+from xmlrpc.client import boolean
 
 from blockchain. CryptoHash import CryptoHash
 from blockchain.Wallet import Wallet
@@ -116,6 +117,27 @@ class Block:
         wallet.upload_wallet(public_key=public_key)
         wallet.deserialize_public_key()
         return Wallet.verify(wallet.public_key, transaction, signature)
+
+    @staticmethod
+    def is_valid_audit_block(current_block:dict, last_block:dict) -> bool: 
+        reconstructed_hash = CryptoHash.get_hash(current_block.get("timestamp"), last_block.get("hash"),
+                                                 current_block.get("merkle_root"),
+                                                 current_block.get("number_transactions"),
+                                                 current_block.get("transactions_hashes"))
+
+        reconstructed_last_hash = CryptoHash.get_hash(last_block.get("timestamp"), last_block.get("last_hash"),
+                                                      last_block.get("merkle_root"),
+                                                      last_block.get("number_transactions"),
+                                                      last_block.get("transactions_hashes"))
+        if current_block.get("hash") != reconstructed_hash:
+            print('The block hash is not valid.')
+            return False
+
+        if last_block.get("hash") != reconstructed_last_hash:
+            print('The last block hash is not valid.')
+            return False
+        
+        return True
 
 
 def main():
