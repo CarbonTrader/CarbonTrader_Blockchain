@@ -1,6 +1,7 @@
 import json
 import logging
 import requests
+import datetime
 
 # Initialize logger
 logger = logging.getLogger(__name__)
@@ -95,3 +96,14 @@ class DataIntegrator:
         data = DataIntegrator.read_json("config/config.json")
         blockchain = requests.get(data["URL_BACKUP"])
         DataIntegrator.update_blockchain(blockchain.json())
+
+    @staticmethod
+    def save_time(test_name, time, death_nodes):
+        info = DataIntegrator.read_json("db/load_test.json")
+        starter_info = {
+            "test_name": test_name,
+            "time": time,
+            "death_nodes": death_nodes
+        }
+        info.append(starter_info)
+        DataIntegrator.write_json("db/load_test.json", info)

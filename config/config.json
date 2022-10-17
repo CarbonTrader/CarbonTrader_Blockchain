@@ -1,7 +1,8 @@
 {
     "NODE_ID": "Node1",
     "MAX_TRANSACTIONS_PER_BLOCK": 3,
-    "TIME_OUT": 0.2,
+    "TIME_OUT": 0.05,
     "URL_BACKUP": "https://api-carbontrader.herokuapp.com/recovery",
-    "Auth-token": ""
+    "Auth-token": "",
+    "TEST_NAME": "test_0"
 }

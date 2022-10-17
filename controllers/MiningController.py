@@ -51,7 +51,12 @@ class MiningController:
             logger.info("This node is a validator.")
             is_agreed_valid = MiningController.validate_new_block(blockchain, transactions_to_mine, mining_publisher,
                                                                   mining_topic_path)
-        return is_agreed_valid
+
+        death_nodes = []
+        for k,v in VALIDATION.items():
+            if not v:
+                death_nodes.append(k)
+        return is_agreed_valid, death_nodes
 
     @staticmethod
     def mine_new_block(mining_publisher, mining_topic_path, blockchain, transactions_to_mine):
@@ -84,10 +89,12 @@ class MiningController:
             transactions_to_mine)
         new_block_to_verify = DataIntegrator.read_json("db/new_block.json")
         is_valid = False
-        timeout = time.time() + 60 * Parameters.get_time_out()  # 5 minutes from now
+        timeout = time.time() + 60 * Parameters.get_time_out()
+        print(timeout)# 5 minutes from now
         while not new_block_to_verify:
             time.sleep(1)
             new_block_to_verify = DataIntegrator.read_json("db/new_block.json")
+            print(time.time())
             if time.time() > timeout:
                 break
         if Block.is_valid_block(new_block_to_verify, blockchain.chain[-1], transactions_to_mine, transactions_hashes):

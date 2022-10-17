@@ -1,10 +1,5 @@
 from integrators.DataIntegrator import DataIntegrator
 
-NODE_ID = 'Node1'
-MAX_TRANSACTIONS_PER_BLOCK = 3
-TIME_OUT = 0.2
-URL_BACKUP = "localhost:8000/blockchain/backup"
-
 
 class Parameters:
     @staticmethod
@@ -26,3 +21,9 @@ class Parameters:
     def get_url_backup():
         data = DataIntegrator.read_json("config/config.json")
         return data["URL_BACKUP"]
+
+    @staticmethod
+    def get_test_name():
+        data = DataIntegrator.read_json("config/config.json")
+        return data["TEST_NAME"]
+

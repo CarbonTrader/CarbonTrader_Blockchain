@@ -7,7 +7,7 @@ from concurrent import futures
 from google.cloud import pubsub_v1
 from pydantic import BaseSettings
 import logging
-
+import time
 from controllers.AuditController import AuditController
 from controllers.ConsensusController import ConsensusController
 from controllers.MiningController import MiningController
@@ -68,9 +68,12 @@ def handle_transaction_message(message):
     transactions.append(transaction)
     DataIntegrator.write_json("db/local_transactions.json", transactions)
     if len(transactions) >= Parameters.get_max_transactions_per_block():
+        st = time.time()
         DataIntegrator.update_transactions_to_mine(
             Parameters.get_max_transactions_per_block())
-        start_consensus_process()
+        death_nodes = start_consensus_process()
+        et = time.time()
+        DataIntegrator.save_time(Parameters.get_test_name(), et - st, death_nodes)
 
 
 def start_consensus_process():
@@ -79,7 +82,7 @@ def start_consensus_process():
         winner = begin_consensus_thread()
         logger.warning("There was no agreed winner.")
         logger.warning("Restarting consensus algorithm.")
-    begin_mining_thread(winner)
+    return begin_mining_thread(winner)
 
 
 def begin_consensus_thread():
@@ -94,11 +97,12 @@ def begin_mining_thread(winner):
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future = executor.submit(
             MiningController.begin_mining, api_publisher, api_topic_path, winner)
-        valid_mining = future.result()
+        valid_mining, death_nodes = future.result()
         if valid_mining:
             logger.info("Mining is done.")
         else:
             start_consensus_process()
+        return death_nodes
 
 
 def handle_message(message):
