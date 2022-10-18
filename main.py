@@ -71,7 +71,7 @@ def handle_transaction_message(message):
         DataIntegrator.update_transactions_to_mine(
             Parameters.get_max_transactions_per_block())
         start_consensus_process()
-
+        DataIntegrator.reset_mining()
 
 def start_consensus_process():
     winner = begin_consensus_thread()
